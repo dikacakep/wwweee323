@@ -127,7 +127,7 @@ export default function Home() {
         <div className="join-buttons">
           {/* ✅ Ganti # dengan link Discord kamu */}
           <a
-            href="https://discord.gg/Bun8HKKQ3D"
+            href="https://discord.gg/xxxxxx"
             className="join-btn discord-btn"
             target="_blank"
             rel="noopener noreferrer"
@@ -141,7 +141,7 @@ export default function Home() {
 
           {/* ✅ Ganti # dengan link WhatsApp kamu */}
           <a
-            href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
+            href="https://chat.whatsapp.com/xxxxxx"
             className="join-btn whatsapp-btn"
             target="_blank"
             rel="noopener noreferrer"
