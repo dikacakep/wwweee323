@@ -1,26 +1,27 @@
 import { useEffect, useState } from "react";
+import Head from "next/head";
 import Image from "next/image";
 
 const seedImages = {
-  'sunflower seed': '/sunflower.png',
-  'cactus seed': '/cactus.png',
-  'strawberry seed': '/strawberry.png',
-  'pumpkin seed': '/pumpkin.png',
-  'dragon fruit seed': '/dragon_fruit.png',
-  'eggplant seed': '/eggplant.png',
-  'watermelon seed': '/watermelon.png',
-  'cocotank seed': '/cocotank.png',
-  'carnivorous plant seed': '/carnivorous.png',
-  'mr carrot seed': '/mrcarrot.png',
-  'tomatrio seed': '/tomatrio.png',
+  "sunflower seed": "/sunflower.png",
+  "cactus seed": "/cactus.png",
+  "strawberry seed": "/strawberry.png",
+  "pumpkin seed": "/pumpkin.png",
+  "dragon fruit seed": "/dragon_fruit.png",
+  "eggplant seed": "/eggplant.png",
+  "watermelon seed": "/watermelon.png",
+  "cocotank seed": "/cocotank.png",
+  "carnivorous plant seed": "/carnivorous.png",
+  "mr carrot seed": "/mrcarrot.png",
+  "tomatrio seed": "/tomatrio.png",
 };
 
 const gearImages = {
-  'water bucket': '/water_bucket.png',
-  'frost grenade': '/frost_grenade.png',
-  'banana gun': '/banana_gun.png',
-  'frost blower': '/frost_blower.png',
-  'carrot launcher': '/carrot_launcher.png',
+  "water bucket": "/water_bucket.png",
+  "frost grenade": "/frost_grenade.png",
+  "banana gun": "/banana_gun.png",
+  "frost blower": "/frost_blower.png",
+  "carrot launcher": "/carrot_launcher.png",
 };
 
 export default function Home() {
@@ -28,10 +29,7 @@ export default function Home() {
   const [nextUpdate, setNextUpdate] = useState(null);
 
   const cleanName = (name) => {
-    return name
-      .replace(/^[^\w]+/, "") // hilangkan emoji
-      .trim()
-      .toLowerCase();
+    return name.replace(/^[^\w]+/, "").trim().toLowerCase();
   };
 
   const fetchStockData = async () => {
@@ -66,7 +64,7 @@ export default function Home() {
       next.setMinutes(next.getMinutes() + 5);
       setNextUpdate(next);
     } catch (err) {
-      console.error("Gagal memuat data:", err);
+      console.error("Failed to fetch stock data:", err);
     }
   };
 
@@ -82,10 +80,10 @@ export default function Home() {
   }, [nextUpdate]);
 
   const formatCountdown = () => {
-    if (!nextUpdate) return "Menghitung...";
+    if (!nextUpdate) return "Calculating...";
     const now = new Date();
     const diff = nextUpdate - now;
-    if (diff <= 0) return "Memperbarui...";
+    if (diff <= 0) return "Updating...";
     const mins = Math.floor(diff / 60000);
     const secs = Math.floor((diff % 60000) / 1000);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -115,65 +113,81 @@ export default function Home() {
   );
 
   return (
-    <div className="container">
-      <header>
-        <h1>🌱 Live Plant vs Brainrots 🧠</h1>
-        <p className="subtitle">Live Plant vs Brainrots Stocks</p>
-        <p className="description">
-          The stock data is automatically pulled from the in-game shops when
-          it&apos;s time to change, ensuring the most accurate stocks all the
-          time. Seed and gear stocks update every 5 minutes.
-        </p>
-        <div className="join-buttons">
-          {/* ✅ Ganti # dengan link Discord kamu */}
-          <a
-            href="https://discord.gg/xxxxxx"
-            className="join-btn discord-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="btn-icon">💬</span>
-            <span className="btn-text">Join Discord Server</span>
-            <span className="btn-desc">
-              🤖 Discord Server and Bot info stock
-            </span>
-          </a>
+    <>
+      {/* ✅ SEO Optimization */}
+      <Head>
+        <title>Plant vs Brainrots - Live Seed & Gear Stock Notifier</title>
+        <meta
+          name="description"
+          content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop."
+        />
+        <meta
+          name="keywords"
+          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
+        />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
+        <link rel="icon" href="/favicon.ico"/>
+      </Head>
 
-          {/* ✅ Ganti # dengan link WhatsApp kamu */}
-          <a
-            href="https://chat.whatsapp.com/xxxxxx"
-            className="join-btn whatsapp-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="btn-icon">📱</span>
-            <span className="btn-text">Join WhatsApp</span>
-            <span className="btn-desc">📢 Plant vs Brainrots Stock</span>
-          </a>
-        </div>
-      </header>
+      <div className="container">
+        <header>
+          <h1>🌱 Live Plant vs Brainrots 🧠</h1>
+          <p className="subtitle">Real-Time Seed & Gear Stock Notifier</p>
+          <p className="description">
+            Stay updated with the latest Plant vs Brainrots shop changes! This
+            site automatically pulls seed and gear stock directly from the game
+            every 5 minutes — ensuring you never miss an item restock again.
+          </p>
+          <div className="join-buttons">
+            {/* ✅ Replace with your Discord link */}
+            <a
+              href="https://discord.gg/Bun8HKKQ3D"
+              className="join-btn discord-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="btn-icon">💬</span>
+              <span className="btn-text">Join Discord Server</span>
+              <span className="btn-desc">🤖 Stock alerts & trading community</span>
+            </a>
 
-      <div className="last-update">
-        ⏱️ Next update in: <strong>{formatCountdown()}</strong>
-      </div>
-
-      <div className="stats-grid">
-        <div className="category-card">
-          <div className="category-header">
-            <div className="category-icon">🌱</div>
-            <div className="category-title">Seeds</div>
+            {/* ✅ Replace with your WhatsApp link */}
+            <a
+              href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
+              className="join-btn whatsapp-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="btn-icon">📱</span>
+              <span className="btn-text">Join WhatsApp Group</span>
+              <span className="btn-desc">📢 Real-time Plant vs Brainrots notifier</span>
+            </a>
           </div>
-          <div className="item-list">{stockData.seeds.map(createItem)}</div>
+        </header>
+
+        <div className="last-update">
+          ⏱️ Next update in: <strong>{formatCountdown()}</strong>
         </div>
 
-        <div className="category-card">
-          <div className="category-header">
-            <div className="category-icon">⚙️</div>
-            <div className="category-title">Gear</div>
+        <div className="stats-grid">
+          <div className="category-card">
+            <div className="category-header">
+              <div className="category-icon">🌱</div>
+              <div className="category-title">Seeds</div>
+            </div>
+            <div className="item-list">{stockData.seeds.map(createItem)}</div>
           </div>
-          <div className="item-list">{stockData.gear.map(createItem)}</div>
+
+          <div className="category-card">
+            <div className="category-header">
+              <div className="category-icon">⚙️</div>
+              <div className="category-title">Gear</div>
+            </div>
+            <div className="item-list">{stockData.gear.map(createItem)}</div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
