@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const seedImages = {
   'sunflower seed': '/sunflower.png',
@@ -23,52 +23,50 @@ const gearImages = {
   'carrot launcher': '/carrot_launcher.png',
 };
 
-// 🧼 Fungsi bantu: hapus emoji dan spasi aneh
-const cleanName = (str) => {
-  return str
-    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '') // hapus emoji
-    .replace(/\s+/g, ' ') // ubah banyak spasi jadi 1
-    .trim()
-    .toLowerCase();
-};
-
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
 
+  const cleanName = (name) => {
+    return name
+      .replace(/^[^\w]+/, "") // hilangkan emoji
+      .trim()
+      .toLowerCase();
+  };
+
   const fetchStockData = async () => {
     try {
-      const res = await fetch('/api/stock');
+      const res = await fetch("/api/stock");
       const data = await res.json();
 
-      console.log('📦 Data dari API:', data);
+      const seeds =
+        data?.seedgear?.seeds?.map((item) => {
+          const clean = cleanName(item.name);
+          return {
+            name: item.name.replace(/^[^\w]+/, "").trim(),
+            icon: seedImages[clean] || "",
+            stock: parseInt(item.value.replace("x", ""), 10),
+          };
+        }) || [];
 
-      const seeds = data.seedgear?.seeds?.map(item => {
-        const key = cleanName(item.name); // 🧼 bersihkan emoji
-        return {
-          name: item.name.replace(/^[^\w]+/, ''), // hilangkan emoji di tampilan
-          icon: seedImages[key] || '/default.png', // ambil gambar
-          stock: parseInt(item.value.replace('x', ''), 10),
-        };
-      }) || [];
-
-      const gear = data.seedgear?.gear?.map(item => {
-        const key = cleanName(item.name);
-        return {
-          name: item.name.replace(/^[^\w]+/, ''),
-          icon: gearImages[key] || '/default.png',
-          stock: parseInt(item.value.replace('x', ''), 10),
-        };
-      }) || [];
+      const gear =
+        data?.seedgear?.gear?.map((item) => {
+          const clean = cleanName(item.name);
+          return {
+            name: item.name.replace(/^[^\w]+/, "").trim(),
+            icon: gearImages[clean] || "",
+            stock: parseInt(item.value.replace("x", ""), 10),
+          };
+        }) || [];
 
       setStockData({ seeds, gear });
 
-      const updatedAt = new Date(data.seedgear.updatedAt);
+      const updatedAt = new Date(data?.seedgear?.updatedAt);
       const next = new Date(updatedAt);
       next.setMinutes(next.getMinutes() + 5);
       setNextUpdate(next);
-    } catch (error) {
-      console.error('Gagal memuat data:', error);
+    } catch (err) {
+      console.error("Gagal memuat data:", err);
     }
   };
 
@@ -83,16 +81,30 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [nextUpdate]);
 
-  const createItemElement = (item) => (
+  const formatCountdown = () => {
+    if (!nextUpdate) return "Menghitung...";
+    const now = new Date();
+    const diff = nextUpdate - now;
+    if (diff <= 0) return "Memperbarui...";
+    const mins = Math.floor(diff / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const createItem = (item) => (
     <div className="item" key={item.name}>
-      <div className="item-info" style={{ display: 'flex', alignItems: 'center' }}>
-        <Image 
-          src={item.icon} 
-          alt={item.name} 
-          width={32} 
-          height={32} 
-          style={{ marginRight: 12, objectFit: 'contain' }} 
-        />
+      <div className="item-info">
+        {item.icon ? (
+          <Image
+            src={item.icon}
+            alt={item.name}
+            width={32}
+            height={32}
+            style={{ marginRight: 12 }}
+          />
+        ) : (
+          <div style={{ width: 32, height: 32, marginRight: 12 }}></div>
+        )}
         <div className="item-name">{item.name}</div>
       </div>
       <div className="item-stock">
@@ -102,25 +114,34 @@ export default function Home() {
     </div>
   );
 
-  const formatCountdown = () => {
-    if (!nextUpdate) return 'Menghitung...';
-    const now = new Date();
-    const diff = nextUpdate - now;
-    if (diff <= 0) return 'Memperbarui...';
-    const mins = Math.floor(diff / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
     <div className="container">
       <header>
-        <h1>🌱 Plant vs Zombies 🧠</h1>
-        <p className="subtitle">Real-Time Stock Tracker</p>
+        <h1>🌱 Live Plant vs Brainrots 🧠</h1>
+        <p className="subtitle">Live Plant vs Brainrots Stocks</p>
+        <p className="description">
+          The stock data is automatically pulled from the in-game shops when
+          it&apos;s time to change, ensuring the most accurate stocks all the
+          time. Seed and gear stocks update every 5 minutes.
+        </p>
+        <div className="join-buttons">
+          <a href="#" className="join-btn discord-btn">
+            <span className="btn-icon">💬</span>
+            <span className="btn-text">Join Discord Server</span>
+            <span className="btn-desc">
+              🤖 Discord Server and Bot info stock
+            </span>
+          </a>
+          <a href="#" className="join-btn whatsapp-btn">
+            <span className="btn-icon">📱</span>
+            <span className="btn-text">Join WhatsApp</span>
+            <span className="btn-desc">📢 Plant vs Brainrots Stock</span>
+          </a>
+        </div>
       </header>
 
       <div className="last-update">
-        ⏰ Update berikutnya: <strong>{formatCountdown()}</strong>
+        ⏱️ Next update in: <strong>{formatCountdown()}</strong>
       </div>
 
       <div className="stats-grid">
@@ -129,9 +150,7 @@ export default function Home() {
             <div className="category-icon">🌱</div>
             <div className="category-title">Seeds</div>
           </div>
-          <div className="item-list">
-            {stockData.seeds?.map(createItemElement)}
-          </div>
+          <div className="item-list">{stockData.seeds.map(createItem)}</div>
         </div>
 
         <div className="category-card">
@@ -139,9 +158,7 @@ export default function Home() {
             <div className="category-icon">⚙️</div>
             <div className="category-title">Gear</div>
           </div>
-          <div className="item-list">
-            {stockData.gear?.map(createItemElement)}
-          </div>
+          <div className="item-list">{stockData.gear.map(createItem)}</div>
         </div>
       </div>
     </div>
