@@ -125,14 +125,27 @@ export default function Home() {
           time. Seed and gear stocks update every 5 minutes.
         </p>
         <div className="join-buttons">
-          <a href="#" className="join-btn discord-btn">
+          {/* ✅ Ganti # dengan link Discord kamu */}
+          <a
+            href="https://discord.gg/Bun8HKKQ3D"
+            className="join-btn discord-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span className="btn-icon">💬</span>
             <span className="btn-text">Join Discord Server</span>
             <span className="btn-desc">
               🤖 Discord Server and Bot info stock
             </span>
           </a>
-          <a href="#" className="join-btn whatsapp-btn">
+
+          {/* ✅ Ganti # dengan link WhatsApp kamu */}
+          <a
+            href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
+            className="join-btn whatsapp-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span className="btn-icon">📱</span>
             <span className="btn-text">Join WhatsApp</span>
             <span className="btn-desc">📢 Plant vs Brainrots Stock</span>
