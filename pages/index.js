@@ -30,6 +30,7 @@ export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
   const prevDataRef = useRef(null);
+  const fetchingRef = useRef(false); // mencegah fetch ganda
 
   const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
 
@@ -39,57 +40,76 @@ export default function Home() {
   };
 
   const fetchStockData = async () => {
-  try {
-    const res = await fetch("/api/stock", {
-      headers: {
-        "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      },
-    });
-    if (!res.ok) throw new Error(`API error ${res.status}`);
+    if (fetchingRef.current) return; // kalau sedang fetch, jangan ulang
+    fetchingRef.current = true;
 
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/stock", {
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+        },
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
 
-    const seeds =
-      data?.seeds?.map((item) => {
-        const clean = cleanName(item.name);
-        return {
-          name: item.name.replace(/^[^\w]+/, "").trim(),
-          icon: seedImages[clean] || "",
-          stock: item.stock,
-        };
-      }) || [];
+      const data = await res.json();
 
-    const gear =
-      data?.gears?.map((item) => {
-        const clean = cleanName(item.name);
-        return {
-          name: item.name.replace(/^[^\w]+/, "").trim(),
-          icon: gearImages[clean] || "",
-          stock: item.stock,
-        };
-      }) || [];
+      const seeds =
+        data?.seeds?.map((item) => {
+          const clean = cleanName(item.name);
+          return {
+            name: item.name.replace(/^[^\w]+/, "").trim(),
+            icon: seedImages[clean] || "",
+            stock: item.stock,
+          };
+        }) || [];
 
-    const newData = { seeds, gear };
+      const gear =
+        data?.gears?.map((item) => {
+          const clean = cleanName(item.name);
+          return {
+            name: item.name.replace(/^[^\w]+/, "").trim(),
+            icon: gearImages[clean] || "",
+            stock: item.stock,
+          };
+        }) || [];
 
-    // ✅ Reset timer hanya jika data berubah ATAU belum pernah fetch
-    if (isDataChanged(prevDataRef.current, newData) || !nextUpdate) {
-      console.log("✅ Data berubah / pertama kali → Reset timer");
-      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
-    } else {
-      console.log("ℹ️ Data sama → Timer tetap jalan, tidak reset");
+      const newData = { seeds, gear };
+
+      // ✅ Reset timer hanya jika data berubah atau belum ada timer
+      if (isDataChanged(prevDataRef.current, newData) || !nextUpdate) {
+        console.log("✅ Data berubah / pertama kali → reset timer 5 menit");
+        setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+      } else {
+        console.log("ℹ️ Data sama → timer tetap jalan, tidak reset");
+      }
+
+      setStockData(newData);
+      prevDataRef.current = newData;
+    } catch (err) {
+      console.error("❌ Gagal mengambil stock:", err);
+
+      // Jika belum ada timer sama sekali (first load gagal), tetap set supaya retry nanti
+      if (!nextUpdate) {
+        setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+      }
+    } finally {
+      fetchingRef.current = false;
     }
+  };
 
-    setStockData(newData);
-    prevDataRef.current = newData;
-  } catch (err) {
-    console.error("Failed to fetch stock data:", err);
+  useEffect(() => {
+    fetchStockData(); // pertama kali
 
-    // ❗ Jika fetch gagal total, tetap reset supaya coba lagi 5 menit kemudian
-    if (!nextUpdate) {
-      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
-    }
-  }
-};
+    const interval = setInterval(() => {
+      if (!nextUpdate) return;
+      const now = new Date();
+      if (now >= nextUpdate) {
+        fetchStockData();
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [nextUpdate]);
 
   const formatCountdown = () => {
     if (!nextUpdate) return "Calculating...";
@@ -159,7 +179,9 @@ export default function Home() {
             >
               <span className="btn-icon">💬</span>
               <span className="btn-text">Join Discord Server</span>
-              <span className="btn-desc">🤖 Stock alerts & trading community</span>
+              <span className="btn-desc">
+                🤖 Stock alerts & trading community
+              </span>
             </a>
             <a
               href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
@@ -169,7 +191,9 @@ export default function Home() {
             >
               <span className="btn-icon">📱</span>
               <span className="btn-text">Join WhatsApp Group</span>
-              <span className="btn-desc">📢 Real-time Plant vs Brainrots notifier</span>
+              <span className="btn-desc">
+                📢 Real-time Plant vs Brainrots notifier
+              </span>
             </a>
           </div>
         </header>
@@ -199,5 +223,3 @@ export default function Home() {
     </>
   );
 }
-
-
