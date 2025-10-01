@@ -1,26 +1,24 @@
-// Serverless function untuk mengambil data dari API eksternal
-export default async function handler(req, res) {
-  try {
-    const apiUrl = 'http://188.166.234.88:3000/stock.json';
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-cache',
-    });
+// middleware.js
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+import { NextResponse } from 'next/server';
 
-    const data = await response.json();
-    res.status(200).json(data);
-  } catch (error) {
-    console.error('Error fetching stock data:', error);
-    res.status(500).json({ error: 'Failed to fetch stock data' });
+export function middleware(req) {
+  // Ambil header Authorization
+  const auth = req.headers.get('authorization');
+
+  // Cek apakah sesuai token rahasia dari .env
+  if (auth !== `Bearer ${process.env.API_TOKEN}`) {
+    return new NextResponse(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
+  // Lanjut ke handler jika token benar
+  return NextResponse.next();
 }
 
+// Hanya berlaku untuk endpoint /api/stock
+export const config = {
+  matcher: '/api/stock',
+};
