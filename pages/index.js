@@ -42,7 +42,7 @@ export default function Home() {
     try {
       const res = await fetch("/api/stock", {
         headers: {
-          "Authorization": `Bearer ${process.env.API_TOKEN}`,
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
         },
       });
       if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -215,3 +215,4 @@ export default function Home() {
     </>
   );
 }
+
