@@ -39,73 +39,57 @@ export default function Home() {
   };
 
   const fetchStockData = async () => {
-    try {
-      const res = await fetch("/api/stock", {
-        headers: {
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-        },
-      });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
+  try {
+    const res = await fetch("/api/stock", {
+      headers: {
+        "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+      },
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
 
-      const data = await res.json();
+    const data = await res.json();
 
-      const seeds =
-        data?.seeds?.map((item) => {
-          const clean = cleanName(item.name);
-          return {
-            name: item.name.replace(/^[^\w]+/, "").trim(),
-            icon: seedImages[clean] || "",
-            stock: item.stock,
-          };
-        }) || [];
+    const seeds =
+      data?.seeds?.map((item) => {
+        const clean = cleanName(item.name);
+        return {
+          name: item.name.replace(/^[^\w]+/, "").trim(),
+          icon: seedImages[clean] || "",
+          stock: item.stock,
+        };
+      }) || [];
 
-      const gear =
-        data?.gears?.map((item) => {
-          const clean = cleanName(item.name);
-          return {
-            name: item.name.replace(/^[^\w]+/, "").trim(),
-            icon: gearImages[clean] || "",
-            stock: item.stock,
-          };
-        }) || [];
+    const gear =
+      data?.gears?.map((item) => {
+        const clean = cleanName(item.name);
+        return {
+          name: item.name.replace(/^[^\w]+/, "").trim(),
+          icon: gearImages[clean] || "",
+          stock: item.stock,
+        };
+      }) || [];
 
-      const newData = { seeds, gear };
+    const newData = { seeds, gear };
 
-      // ❗ Reset timer setiap kali fetch, walaupun data tidak berubah
+    // ✅ Reset timer hanya jika data berubah ATAU belum pernah fetch
+    if (isDataChanged(prevDataRef.current, newData) || !nextUpdate) {
+      console.log("✅ Data berubah / pertama kali → Reset timer");
       setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+    } else {
+      console.log("ℹ️ Data sama → Timer tetap jalan, tidak reset");
+    }
 
-      // Simpan data baru
-      setStockData(newData);
+    setStockData(newData);
+    prevDataRef.current = newData;
+  } catch (err) {
+    console.error("Failed to fetch stock data:", err);
 
-      // Cek perubahan (optional: log)
-      if (isDataChanged(prevDataRef.current, newData)) {
-        console.log("✅ Stock updated");
-      } else {
-        console.log("ℹ️ Stock same as before, but timer reset anyway");
-      }
-
-      prevDataRef.current = newData;
-    } catch (err) {
-      console.error("Failed to fetch stock data:", err);
-      // tetap reset timer walaupun gagal agar retry terus
+    // ❗ Jika fetch gagal total, tetap reset supaya coba lagi 5 menit kemudian
+    if (!nextUpdate) {
       setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
     }
-  };
-
-  useEffect(() => {
-    // Fetch pertama kali
-    fetchStockData();
-
-    // Interval untuk cek countdown & fetch ulang jika waktunya habis
-    const interval = setInterval(() => {
-      const now = new Date();
-      if (nextUpdate && now >= nextUpdate) {
-        fetchStockData();
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [nextUpdate]);
+  }
+};
 
   const formatCountdown = () => {
     if (!nextUpdate) return "Calculating...";
@@ -215,4 +199,5 @@ export default function Home() {
     </>
   );
 }
+
 
