@@ -29,11 +29,10 @@ const gearImages = {
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [error, setError] = useState(null);
-  const [isRestocking, setIsRestocking] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const prevDataRef = useRef(null);
-  const isWaitingRef = useRef(false);
+  const updateTimeoutRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
 
   const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
 
@@ -42,131 +41,119 @@ export default function Home() {
     return JSON.stringify(oldData) !== JSON.stringify(newData);
   };
 
-  // Fungsi untuk menghitung kelipatan 5 menit berikutnya
-  const getNextFiveMinuteMark = () => {
-    const now = new Date();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    const milliseconds = now.getMilliseconds();
-
-    const minutesToNext = 5 - (minutes % 5) || 5;
-    const secondsToNext = minutesToNext * 60 - seconds;
-    const msToNext = secondsToNext * 1000 - milliseconds;
-
-    const next = new Date(now.getTime() + msToNext);
-    console.log(`⏰ Next update scheduled at: ${next.toLocaleTimeString()}`);
-    return next;
+  const resetTimer = (immediate = false) => {
+    // Clear timeout yang ada
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+    
+    if (immediate) {
+      // Reset langsung tanpa delay
+      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+      setIsUpdating(false);
+    } else {
+      // Masuk mode updating selama 14 detik
+      setIsUpdating(true);
+      setNextUpdate(null); // Hentikan countdown
+      
+      updateTimeoutRef.current = setTimeout(() => {
+        // Setelah 14 detik, reset timer ke 5 menit
+        setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+        setIsUpdating(false);
+      }, 14000);
+    }
   };
 
-  const fetchStockData = async (isManualCheck = false) => {
+  const fetchStockData = async () => {
     try {
-      console.log(isManualCheck ? "⏳ Checking for new stock..." : "⏳ Fetching stock data...");
       const res = await fetch("/api/stock", {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN || ""}`,
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
         },
       });
-      if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
-
+      
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      
       const data = await res.json();
-      console.log("📡 API response:", data);
+      
+      const seeds = data?.seeds?.map((item) => {
+        const clean = cleanName(item.name);
+        return {
+          name: item.name.replace(/^[^\w]+/, "").trim(),
+          icon: seedImages[clean] || "",
+          stock: item.stock,
+        };
+      }) || [];
 
-      const seeds =
-        data?.seeds?.map((item) => {
-          const clean = cleanName(item.name);
-          return {
-            name: item.name.replace(/^[^\w]+/, "").trim(),
-            icon: seedImages[clean] || "",
-            stock: item.stock,
-          };
-        }) || [];
-
-      const gear =
-        data?.gears?.map((item) => {
-          const clean = cleanName(item.name);
-          return {
-            name: item.name.replace(/^[^\w]+/, "").trim(),
-            icon: gearImages[clean] || "",
-            stock: item.stock,
-          };
-        }) || [];
+      const gear = data?.gears?.map((item) => {
+        const clean = cleanName(item.name);
+        return {
+          name: item.name.replace(/^[^\w]+/, "").trim(),
+          icon: gearImages[clean] || "",
+          stock: item.stock,
+        };
+      }) || [];
 
       const newData = { seeds, gear };
-      console.log("📦 Processed stock data:", newData);
-
-      if (isDataChanged(prevDataRef.current, newData) || !isManualCheck) {
+      
+      // Cek perubahan data
+      const hasChanged = isDataChanged(prevDataRef.current, newData);
+      
+      if (hasChanged) {
+        console.log("✅ Stock updated - Timer reset immediately");
         setStockData(newData);
-        setError(null);
-        console.log("✅ Stock updated");
+        prevDataRef.current = newData;
+        resetTimer(true); // Reset timer langsung tanpa delay
       } else {
-        console.log("ℹ️ No new stock");
+        console.log("ℹ️ Stock same as before - Normal timer reset");
+        setStockData(newData);
+        prevDataRef.current = newData;
+        resetTimer(false); // Normal reset dengan 14 detik delay
       }
-
-      prevDataRef.current = newData;
-      const hasNewStock = res.headers.get("X-Stock-Updated") === "true" || data?.hasNewStock;
-      return hasNewStock;
+      
     } catch (err) {
-      console.error("❌ Failed to fetch stock data:", err.message);
-      setError(`Failed to load stock data: ${err.message}. Retrying soon...`);
-      return false;
+      console.error("Failed to fetch stock data:", err);
+      // Tetap reset timer dengan delay jika error
+      resetTimer(false);
     }
   };
 
   useEffect(() => {
-    // Inisialisasi nextUpdate
-    setNextUpdate(getNextFiveMinuteMark());
-    fetchStockData(); // Fetch pertama kali
-
-    // Interval untuk timer dan fetch
-    const interval = setInterval(async () => {
-      const now = new Date();
-      setCurrentTime(now); // Perbarui waktu untuk timer
-
-      if (isWaitingRef.current) {
-        return; // Sedang menunggu 10 detik
-      }
-
-      // Cek stok baru setiap 30 detik
-      if (!isRestocking && now.getSeconds() % 30 === 0) {
-        const hasNewStock = await fetchStockData(true);
-        if (hasNewStock) {
-          console.log("🔄 New stock detected, forcing full fetch");
-          setNextUpdate(getNextFiveMinuteMark());
-          fetchStockData(false);
-          return;
+    // Fetch pertama kali
+    fetchStockData();
+    
+    // Setup interval untuk countdown
+    const interval = setInterval(() => {
+      if (nextUpdate && !isUpdating) {
+        const now = new Date();
+        if (now >= nextUpdate) {
+          fetchStockData();
         }
       }
-
-      // Fetch saat kelipatan 5 menit
-      if (nextUpdate && now >= nextUpdate) {
-        console.log("🔄 Time for scheduled fetch");
-        setIsRestocking(true);
-        fetchStockData(false);
-
-        isWaitingRef.current = true;
-        setTimeout(() => {
-          setNextUpdate(getNextFiveMinuteMark());
-          setIsRestocking(false);
-          isWaitingRef.current = false;
-          console.log("🔄 Timer reset after 10-second delay");
-        }, 10 * 1000);
-      }
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, [nextUpdate]);
+    
+    countdownIntervalRef.current = interval;
+    
+    return () => {
+      clearInterval(interval);
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
+  }, [nextUpdate, isUpdating]);
 
   const formatCountdown = () => {
+    if (isUpdating) return "Updating...";
     if (!nextUpdate) return "Calculating...";
-    if (isRestocking) return "Restocking...";
-
-    const diff = nextUpdate - currentTime;
-    if (diff <= 0) return "Restocking...";
-
-    const totalSeconds = Math.floor(diff / 1000);
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-
+    
+    const now = new Date();
+    const diff = nextUpdate - now;
+    
+    if (diff <= 0) return "00:00";
+    
+    const mins = Math.floor(diff / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
@@ -174,12 +161,12 @@ export default function Home() {
     <div className="item" key={item.name}>
       <div className="item-info">
         {item.icon ? (
-          <Image
-            src={item.icon}
-            alt={item.name}
-            width={32}
-            height={32}
-            style={{ marginRight: 12 }}
+          <Image 
+            src={item.icon} 
+            alt={item.name} 
+            width={32} 
+            height={32} 
+            style={{ marginRight: 12 }} 
           />
         ) : (
           <div style={{ width: 32, height: 32, marginRight: 12 }}></div>
@@ -197,85 +184,53 @@ export default function Home() {
     <>
       <Head>
         <title>Plant vs Brainrots - Live Seed & Gear Stock Notifier</title>
-        <meta
-          name="description"
-          content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop."
-        />
-        <meta
-          name="keywords"
-          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
-        />
+        <meta name="description" content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop." />
+        <meta name="keywords" content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      
       <div className="container">
         <header>
           <h1>🌱 Live Plant vs Brainrots 🧠</h1>
           <p className="subtitle">Real-Time Seed & Gear Stock Notifier</p>
           <p className="description">
-            Stay updated with the latest Plant vs Brainrots shop changes! This
-            site automatically pulls seed and gear stock directly from the game
-            every 5 minutes — ensuring you never miss an item restock again.
+            Stay updated with the latest Plant vs Brainrots shop changes! This site automatically pulls seed and gear stock directly from the game every 5 minutes — ensuring you never miss an item restock again.
           </p>
           <div className="join-buttons">
-            <a
-              href="https://discord.gg/Bun8HKKQ3D"
-              className="join-btn discord-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://discord.gg/Bun8HKKQ3D" className="join-btn discord-btn" target="_blank" rel="noopener noreferrer">
               <span className="btn-icon">💬</span>
               <span className="btn-text">Join Discord Server</span>
               <span className="btn-desc">🤖 Stock alerts & trading community</span>
             </a>
-            <a
-              href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
-              className="join-btn whatsapp-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD" className="join-btn whatsapp-btn" target="_blank" rel="noopener noreferrer">
               <span className="btn-icon">📱</span>
               <span className="btn-text">Join WhatsApp Group</span>
               <span className="btn-desc">📢 Real-time Plant vs Brainrots notifier</span>
             </a>
           </div>
         </header>
-
-        {error && <div className="error-message" style={{ color: "red", margin: "10px 0" }}>{error}</div>}
-
+        
         <div className="last-update">
           ⏱️ Next update in: <strong>{formatCountdown()}</strong>
         </div>
-
+        
         <div className="stats-grid">
           <div className="category-card">
             <div className="category-header">
               <div className="category-icon">🌱</div>
               <div className="category-title">Seeds</div>
             </div>
-            <div className="item-list">
-              {stockData.seeds.length > 0 ? (
-                stockData.seeds.map(createItem)
-              ) : (
-                <p>Loading</p>
-              )}
-            </div>
+            <div className="item-list">{stockData.seeds.map(createItem)}</div>
           </div>
-
+          
           <div className="category-card">
             <div className="category-header">
               <div className="category-icon">⚙️</div>
               <div className="category-title">Gear</div>
             </div>
-            <div className="item-list">
-              {stockData.gear.length > 0 ? (
-                stockData.gear.map(createItem)
-              ) : (
-                <p>Loading</p>
-              )}
-            </div>
+            <div className="item-list">{stockData.gear.map(createItem)}</div>
           </div>
         </div>
       </div>
