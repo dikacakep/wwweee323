@@ -28,8 +28,9 @@ const gearImages = {
 
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
-  const [nextUpdate, setNextUpdate] = useState(null);
-  const [currentTime, setCurrentTime] = useState(new Date()); // State baru untuk waktu saat ini
+  const [nextUpdate, setNextUpdate] = useState(new Date(Date.now() + 5 * 60 * 1000)); // Inisialisasi awal
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [error, setError] = useState(null); // State untuk error
   const prevDataRef = useRef(null);
 
   const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
@@ -41,14 +42,16 @@ export default function Home() {
 
   const fetchStockData = async () => {
     try {
+      console.log("⏳ Fetching stock data...");
       const res = await fetch("/api/stock", {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
         },
       });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
 
       const data = await res.json();
+      console.log("📡 API response:", data);
 
       const seeds =
         data?.seeds?.map((item) => {
@@ -71,25 +74,24 @@ export default function Home() {
         }) || [];
 
       const newData = { seeds, gear };
+      console.log("📦 Processed stock data:", newData);
 
-      // Reset timer setiap kali fetch
+      // Reset timer
       setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
-
-      // Simpan data baru
       setStockData(newData);
+      setError(null); // Reset error jika fetch berhasil
 
-      // Cek perubahan (optional: log)
       if (isDataChanged(prevDataRef.current, newData)) {
         console.log("✅ Stock updated");
       } else {
-        console.log("ℹ️ Stock same as before, but timer reset anyway");
+        console.log("ℹ️ Stock same as before");
       }
 
       prevDataRef.current = newData;
     } catch (err) {
-      console.error("Failed to fetch stock data:", err);
-      // Tetap reset timer walaupun gagal agar retry terus
-      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+      console.error("❌ Failed to fetch stock data:", err.message);
+      setError("Failed to load stock data. Retrying in 5 minutes...");
+      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000)); // Tetap reset timer
     }
   };
 
@@ -97,11 +99,12 @@ export default function Home() {
     // Fetch pertama kali
     fetchStockData();
 
-    // Interval untuk memperbarui waktu saat ini dan cek fetch
+    // Interval untuk memperbarui waktu dan fetch
     const interval = setInterval(() => {
       const now = new Date();
-      setCurrentTime(now); // Perbarui waktu saat ini untuk render ulang
+      setCurrentTime(now); // Perbarui waktu untuk timer
       if (nextUpdate && now >= nextUpdate) {
+        console.log("🔄 Time for next fetch");
         fetchStockData();
       }
     }, 1000);
@@ -114,7 +117,6 @@ export default function Home() {
     const diff = nextUpdate - currentTime;
     if (diff <= 0) return "Updating...";
 
-    // Hitung total detik yang tersisa
     const totalSeconds = Math.ceil(diff / 1000);
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
@@ -195,6 +197,8 @@ export default function Home() {
           </div>
         </header>
 
+        {error && <div className="error-message" style={{ color: "red", margin: "10px 0" }}>{error}</div>}
+
         <div className="last-update">
           ⏱️ Next update in: <strong>{formatCountdown()}</strong>
         </div>
@@ -205,7 +209,13 @@ export default function Home() {
               <div className="category-icon">🌱</div>
               <div className="category-title">Seeds</div>
             </div>
-            <div className="item-list">{stockData.seeds.map(createItem)}</div>
+            <div className="item-list">
+              {stockData.seeds.length > 0 ? (
+                stockData.seeds.map(createItem)
+              ) : (
+                <p>No seed data available</p>
+              )}
+            </div>
           </div>
 
           <div className="category-card">
@@ -213,7 +223,13 @@ export default function Home() {
               <div className="category-icon">⚙️</div>
               <div className="category-title">Gear</div>
             </div>
-            <div className="item-list">{stockData.gear.map(createItem)}</div>
+            <div className="item-list">
+              {stockData.gear.length > 0 ? (
+                stockData.gear.map(createItem)
+              ) : (
+                <p>No gear data available</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
