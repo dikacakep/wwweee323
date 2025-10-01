@@ -1,24 +1,20 @@
-// middleware.js
+export default async function handler(req, res) {
+  try {
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.split(" ")[1];
 
-import { NextResponse } from 'next/server';
+    if (token !== process.env.NEXT_PUBLIC_API_TOKEN) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-export function middleware(req) {
-  // Ambil header Authorization
-  const auth = req.headers.get('authorization');
+    const apiUrl = "http://188.166.234.88:3000/stock.json";
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error("Failed to fetch stock data");
 
-  // Cek apakah sesuai token rahasia dari .env
-  if (auth !== `Bearer ${process.env.API_TOKEN}`) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    );
+    const data = await response.json();
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("Error fetching stock:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-
-  // Lanjut ke handler jika token benar
-  return NextResponse.next();
 }
-
-// Hanya berlaku untuk endpoint /api/stock
-export const config = {
-  matcher: '/api/stock',
-};
