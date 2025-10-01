@@ -15,7 +15,7 @@ const seedImages = {
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
   "shroombino seed": "/shroombino.png",
-  "grape seed": "/grapeseed.png",
+  "grape seed": "grapeseed.png",
 };
 
 const gearImages = {
@@ -30,7 +30,6 @@ export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
   const prevDataRef = useRef(null);
-  const fetchingRef = useRef(false);
 
   const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
 
@@ -40,9 +39,6 @@ export default function Home() {
   };
 
   const fetchStockData = async () => {
-    if (fetchingRef.current) return;
-    fetchingRef.current = true;
-
     try {
       const res = await fetch("/api/stock", {
         headers: {
@@ -75,51 +71,53 @@ export default function Home() {
 
       const newData = { seeds, gear };
 
-      // Selalu set nextUpdate ke 5 menit ke depan
-      console.log("✅ Fetch selesai, set timer untuk 5 menit ke depan");
+      // Reset timer setiap kali fetch
       setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
 
-      // Update stockData hanya jika data berubah
+      // Simpan data baru
+      setStockData(newData);
+
+      // Cek perubahan (optional: log)
       if (isDataChanged(prevDataRef.current, newData)) {
-        console.log("✅ Data berubah, update state");
-        setStockData(newData);
-        prevDataRef.current = newData;
+        console.log("✅ Stock updated");
       } else {
-        console.log("ℹ️ Data sama, tidak update state");
+        console.log("ℹ️ Stock same as before, but timer reset anyway");
       }
+
+      prevDataRef.current = newData;
     } catch (err) {
-      console.error("❌ Gagal mengambil stock:", err);
-      // Set nextUpdate untuk retry setelah 5 menit jika gagal
+      console.error("Failed to fetch stock data:", err);
+      // Tetap reset timer walaupun gagal agar retry terus
       setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
-    } finally {
-      fetchingRef.current = false;
     }
   };
 
   useEffect(() => {
-    // Panggil fetch pertama kali saat komponen dimuat
+    // Fetch pertama kali
     fetchStockData();
 
-    // Buat interval yang berjalan setiap detik
+    // Interval untuk cek countdown & fetch ulang jika waktunya habis
     const interval = setInterval(() => {
       const now = new Date();
       if (nextUpdate && now >= nextUpdate) {
-        console.log("⏰ Waktu pembaruan tercapai, fetching data...");
         fetchStockData();
       }
     }, 1000);
 
-    // Bersihkan interval saat komponen di-unmount
     return () => clearInterval(interval);
-  }, []); // Tidak ada dependensi, interval hanya dibuat sekali
+  }, [nextUpdate]);
 
   const formatCountdown = () => {
     if (!nextUpdate) return "Calculating...";
     const now = new Date();
     const diff = nextUpdate - now;
     if (diff <= 0) return "Updating...";
-    const mins = Math.floor(diff / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
+
+    // Hitung total detik yang tersisa
+    const totalSeconds = Math.ceil(diff / 1000); // Gunakan Math.ceil untuk memastikan hitungan dimulai dari 5:00
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
@@ -170,7 +168,7 @@ export default function Home() {
           <p className="description">
             Stay updated with the latest Plant vs Brainrots shop changes! This
             site automatically pulls seed and gear stock directly from the game
-            every 5 menit — ensuring you never miss an item restock again.
+            every 5 minutes — ensuring you never miss an item restock again.
           </p>
           <div className="join-buttons">
             <a
@@ -181,9 +179,7 @@ export default function Home() {
             >
               <span className="btn-icon">💬</span>
               <span className="btn-text">Join Discord Server</span>
-              <span className="btn-desc">
-                🤖 Stock alerts & trading community
-              </span>
+              <span className="btn-desc">🤖 Stock alerts & trading community</span>
             </a>
             <a
               href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
@@ -193,9 +189,7 @@ export default function Home() {
             >
               <span className="btn-icon">📱</span>
               <span className="btn-text">Join WhatsApp Group</span>
-              <span className="btn-desc">
-                📢 Real-time Plant vs Brainrots notifier
-              </span>
+              <span className="btn-desc">📢 Real-time Plant vs Brainrots notifier</span>
             </a>
           </div>
         </header>
