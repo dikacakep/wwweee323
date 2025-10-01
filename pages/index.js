@@ -14,6 +14,8 @@ const seedImages = {
   "carnivorous plant seed": "/carnivorous.png",
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
+  "shroombino seed": "/shroombino.png",
+  "grape seed": "grape.png",
 };
 
 const gearImages = {
@@ -187,3 +189,4 @@ export default function Home() {
     </>
   );
 }
+
