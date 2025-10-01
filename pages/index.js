@@ -31,9 +31,9 @@ export default function Home() {
   const [nextUpdate, setNextUpdate] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [error, setError] = useState(null);
-  const [isRestocking, setIsRestocking] = useState(false); // Untuk status "Restocking"
+  const [isRestocking, setIsRestocking] = useState(false);
   const prevDataRef = useRef(null);
-  const isWaitingRef = useRef(false); // Untuk melacak penundaan 10 detik
+  const isWaitingRef = useRef(false);
 
   const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
 
@@ -42,19 +42,20 @@ export default function Home() {
     return JSON.stringify(oldData) !== JSON.stringify(newData);
   };
 
-  // Fungsi untuk menghitung kelipatan 5 menit berikutnya berdasarkan waktu lokal
+  // Fungsi untuk menghitung kelipatan 5 menit berikutnya
   const getNextFiveMinuteMark = () => {
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
     const milliseconds = now.getMilliseconds();
 
-    // Hitung menit yang tersisa hingga kelipatan 5 menit berikutnya
     const minutesToNext = 5 - (minutes % 5) || 5;
     const secondsToNext = minutesToNext * 60 - seconds;
     const msToNext = secondsToNext * 1000 - milliseconds;
 
-    return new Date(now.getTime() + msToNext);
+    const next = new Date(now.getTime() + msToNext);
+    console.log(`⏰ Next update scheduled at: ${next.toLocaleTimeString()}`);
+    return next;
   };
 
   const fetchStockData = async (isManualCheck = false) => {
@@ -62,10 +63,10 @@ export default function Home() {
       console.log(isManualCheck ? "⏳ Checking for new stock..." : "⏳ Fetching stock data...");
       const res = await fetch("/api/stock", {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN || ""}`,
         },
       });
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
 
       const data = await res.json();
       console.log("📡 API response:", data);
@@ -93,7 +94,6 @@ export default function Home() {
       const newData = { seeds, gear };
       console.log("📦 Processed stock data:", newData);
 
-      // Hanya perbarui stockData jika data berubah atau bukan cek manual
       if (isDataChanged(prevDataRef.current, newData) || !isManualCheck) {
         setStockData(newData);
         setError(null);
@@ -103,49 +103,46 @@ export default function Home() {
       }
 
       prevDataRef.current = newData;
-
-      // Periksa indikasi stok baru (misalnya, header atau field dalam respons)
       const hasNewStock = res.headers.get("X-Stock-Updated") === "true" || data?.hasNewStock;
       return hasNewStock;
     } catch (err) {
       console.error("❌ Failed to fetch stock data:", err.message);
-      setError("Failed to load stock data. Retrying soon...");
+      setError(`Failed to load stock data: ${err.message}. Retrying soon...`);
       return false;
     }
   };
 
   useEffect(() => {
-    // Inisialisasi nextUpdate ke kelipatan 5 menit berikutnya
+    // Inisialisasi nextUpdate
     setNextUpdate(getNextFiveMinuteMark());
     fetchStockData(); // Fetch pertama kali
 
-    // Interval untuk memperbarui waktu dan fetch
+    // Interval untuk timer dan fetch
     const interval = setInterval(async () => {
       const now = new Date();
-      setCurrentTime(now);
+      setCurrentTime(now); // Perbarui waktu untuk timer
 
       if (isWaitingRef.current) {
-        // Sedang dalam masa tunggu 10 detik
-        return;
+        return; // Sedang menunggu 10 detik
       }
 
-      // Cek indikasi stok baru setiap 30 detik (opsional, sesuaikan frekuensi)
-      if (!isRestocking) {
+      // Cek stok baru setiap 30 detik
+      if (!isRestocking && now.getSeconds() % 30 === 0) {
         const hasNewStock = await fetchStockData(true);
         if (hasNewStock) {
           console.log("🔄 New stock detected, forcing full fetch");
-          setNextUpdate(getNextFiveMinuteMark()); // Reset timer jika stok baru
+          setNextUpdate(getNextFiveMinuteMark());
           fetchStockData(false);
           return;
         }
       }
 
+      // Fetch saat kelipatan 5 menit
       if (nextUpdate && now >= nextUpdate) {
         console.log("🔄 Time for scheduled fetch");
         setIsRestocking(true);
         fetchStockData(false);
 
-        // Tunggu 10 detik sebelum reset timer
         isWaitingRef.current = true;
         setTimeout(() => {
           setNextUpdate(getNextFiveMinuteMark());
@@ -166,7 +163,7 @@ export default function Home() {
     const diff = nextUpdate - currentTime;
     if (diff <= 0) return "Restocking...";
 
-    const totalSeconds = Math.ceil(diff / 1000);
+    const totalSeconds = Math.floor(diff / 1000);
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
 
