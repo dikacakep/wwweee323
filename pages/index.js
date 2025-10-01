@@ -29,6 +29,7 @@ const gearImages = {
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date()); // State baru untuk waktu saat ini
   const prevDataRef = useRef(null);
 
   const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
@@ -96,9 +97,10 @@ export default function Home() {
     // Fetch pertama kali
     fetchStockData();
 
-    // Interval untuk cek countdown & fetch ulang jika waktunya habis
+    // Interval untuk memperbarui waktu saat ini dan cek fetch
     const interval = setInterval(() => {
       const now = new Date();
+      setCurrentTime(now); // Perbarui waktu saat ini untuk render ulang
       if (nextUpdate && now >= nextUpdate) {
         fetchStockData();
       }
@@ -109,12 +111,11 @@ export default function Home() {
 
   const formatCountdown = () => {
     if (!nextUpdate) return "Calculating...";
-    const now = new Date();
-    const diff = nextUpdate - now;
+    const diff = nextUpdate - currentTime;
     if (diff <= 0) return "Updating...";
 
     // Hitung total detik yang tersisa
-    const totalSeconds = Math.ceil(diff / 1000); // Gunakan Math.ceil untuk memastikan hitungan dimulai dari 5:00
+    const totalSeconds = Math.ceil(diff / 1000);
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
 
