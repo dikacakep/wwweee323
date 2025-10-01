@@ -38,28 +38,28 @@ export default function Home() {
       const data = await res.json();
 
       const seeds =
-        data?.seedgear?.seeds?.map((item) => {
+        data?.seeds?.map((item) => {
           const clean = cleanName(item.name);
           return {
             name: item.name.replace(/^[^\w]+/, "").trim(),
             icon: seedImages[clean] || "",
-            stock: parseInt(item.value.replace("x", ""), 10),
+            stock: item.stock,
           };
         }) || [];
 
       const gear =
-        data?.seedgear?.gear?.map((item) => {
+        data?.gears?.map((item) => {
           const clean = cleanName(item.name);
           return {
             name: item.name.replace(/^[^\w]+/, "").trim(),
             icon: gearImages[clean] || "",
-            stock: parseInt(item.value.replace("x", ""), 10),
+            stock: item.stock,
           };
         }) || [];
 
       setStockData({ seeds, gear });
 
-      const updatedAt = new Date(data?.seedgear?.updatedAt);
+      const updatedAt = new Date(data?.updatedAt);
       const next = new Date(updatedAt);
       next.setMinutes(next.getMinutes() + 5);
       setNextUpdate(next);
@@ -114,7 +114,6 @@ export default function Home() {
 
   return (
     <>
-      {/* ✅ SEO Optimization */}
       <Head>
         <title>Plant vs Brainrots - Live Seed & Gear Stock Notifier</title>
         <meta
@@ -127,7 +126,7 @@ export default function Home() {
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
-        <link rel="icon" href="/favicon.ico"/>
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className="container">
@@ -140,7 +139,6 @@ export default function Home() {
             every 5 minutes — ensuring you never miss an item restock again.
           </p>
           <div className="join-buttons">
-            {/* ✅ Replace with your Discord link */}
             <a
               href="https://discord.gg/Bun8HKKQ3D"
               className="join-btn discord-btn"
@@ -151,8 +149,6 @@ export default function Home() {
               <span className="btn-text">Join Discord Server</span>
               <span className="btn-desc">🤖 Stock alerts & trading community</span>
             </a>
-
-            {/* ✅ Replace with your WhatsApp link */}
             <a
               href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
               className="join-btn whatsapp-btn"
@@ -191,4 +187,3 @@ export default function Home() {
     </>
   );
 }
-
