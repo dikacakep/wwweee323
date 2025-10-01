@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Head from "next/head";
 import Image from "next/image";
 
@@ -29,14 +29,24 @@ const gearImages = {
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
+  const prevDataRef = useRef(null);
 
-  const cleanName = (name) => {
-    return name.replace(/^[^\w]+/, "").trim().toLowerCase();
+  const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
+
+  const isDataChanged = (oldData, newData) => {
+    if (!oldData) return true;
+    return JSON.stringify(oldData) !== JSON.stringify(newData);
   };
 
   const fetchStockData = async () => {
     try {
-      const res = await fetch("/api/stock");
+      const res = await fetch("/api/stock", {
+        headers: {
+          "Authorization": `Bearer ${process.env.API_TOKEN}`,
+        },
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+
       const data = await res.json();
 
       const seeds =
@@ -59,25 +69,41 @@ export default function Home() {
           };
         }) || [];
 
-      setStockData({ seeds, gear });
+      const newData = { seeds, gear };
 
-      const updatedAt = new Date(data?.updatedAt);
-      const next = new Date(updatedAt);
-      next.setMinutes(next.getMinutes() + 5);
-      setNextUpdate(next);
+      // ❗ Reset timer setiap kali fetch, walaupun data tidak berubah
+      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+
+      // Simpan data baru
+      setStockData(newData);
+
+      // Cek perubahan (optional: log)
+      if (isDataChanged(prevDataRef.current, newData)) {
+        console.log("✅ Stock updated");
+      } else {
+        console.log("ℹ️ Stock same as before, but timer reset anyway");
+      }
+
+      prevDataRef.current = newData;
     } catch (err) {
       console.error("Failed to fetch stock data:", err);
+      // tetap reset timer walaupun gagal agar retry terus
+      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
     }
   };
 
   useEffect(() => {
+    // Fetch pertama kali
     fetchStockData();
+
+    // Interval untuk cek countdown & fetch ulang jika waktunya habis
     const interval = setInterval(() => {
       const now = new Date();
       if (nextUpdate && now >= nextUpdate) {
         fetchStockData();
       }
     }, 1000);
+
     return () => clearInterval(interval);
   }, [nextUpdate]);
 
@@ -189,5 +215,3 @@ export default function Home() {
     </>
   );
 }
-
-
