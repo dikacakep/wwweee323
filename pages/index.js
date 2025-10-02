@@ -35,64 +35,66 @@ export default function Home() {
   };
 
   const parseStockFromDescription = (description) => {
-    try {
-      const sections = description.split('**Gear**');
-      if (sections.length < 2) {
-        console.error('Invalid description format: Gear section not found');
-        return { seeds: [], gear: [] };
-      }
-
-      const seedsText = sections[0].replace('**Seeds**', '').trim();
-      const gearText = sections[1].split('\n\n')[0].trim();
-
-      const seeds = seedsText
-        .split('\n')
-        .filter(line => line.trim() && line.includes(' x'))
-        .map(line => {
-          const [namePart, stockStr] = line.split(' x');
-          if (!namePart || !stockStr) {
-            console.warn(`Invalid seed line format: ${line}`);
-            return null;
-          }
-          const name = namePart.trim();
-          const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
-          const clean = cleanName(name);
-          const icon = seedImages[`${clean} seed`] || seedImages[clean] || "";
-          return {
-            name: name.replace(/^[^\w]+/, "").trim(),
-            icon,
-            stock,
-          };
-        })
-        .filter(item => item !== null);
-
-      const gear = gearText
-        .split('\n')
-        .filter(line => line.trim() && line.includes(' x'))
-        .map(line => {
-          const [namePart, stockStr] = line.split(' x');
-          if (!namePart || !stockStr) {
-            console.warn(`Invalid gear line format: ${line}`);
-            return null;
-          }
-          const name = namePart.trim();
-          const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
-          const clean = cleanName(name);
-          const icon = gearImages[clean] || "";
-          return {
-            name: name.replace(/^[^\w]+/, "").trim(),
-            icon,
-            stock,
-          };
-        })
-        .filter(item => item !== null);
-
-      return { seeds, gear };
-    } catch (err) {
-      console.error('Error parsing description:', err);
+  try {
+    const sections = description.split('**Gear**');
+    if (sections.length < 2) {
+      console.error('Invalid description format: Gear section not found');
       return { seeds: [], gear: [] };
     }
-  };
+
+    const seedsText = sections[0].replace('**Seeds**', '').trim();
+    const gearText = sections[1].split('\n\n')[0].trim();
+
+    const seeds = seedsText
+      .split('\n')
+      .filter(line => line.trim() && line.includes(' x'))
+      .map(line => {
+        const [namePart, stockStr] = line.split(' x');
+        if (!namePart || !stockStr) {
+          console.warn(`Invalid seed line format: ${line}`);
+          return null;
+        }
+        // Remove Discord emoji syntax like <:emoji_name:emoji_id>
+        const cleanNamePart = namePart.replace(/<:[^:]+:\d+>/g, '').trim();
+        const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
+        const clean = cleanName(cleanNamePart);
+        const icon = seedImages[`${clean} seed`] || seedImages[clean] || "";
+        return {
+          name: cleanNamePart,
+          icon,
+          stock,
+        };
+      })
+      .filter(item => item !== null);
+
+    const gear = gearText
+      .split('\n')
+      .filter(line => line.trim() && line.includes(' x'))
+      .map(line => {
+        const [namePart, stockStr] = line.split(' x');
+        if (!namePart || !stockStr) {
+          console.warn(`Invalid gear line format: ${line}`);
+          return null;
+        }
+        // Remove Discord emoji syntax like <:emoji_name:emoji_id>
+        const cleanNamePart = namePart.replace(/<:[^:]+:\d+>/g, '').trim();
+        const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
+        const clean = cleanName(cleanNamePart);
+        const icon = gearImages[clean] || "";
+        return {
+          name: cleanNamePart,
+          icon,
+          stock,
+        };
+      })
+      .filter(item => item !== null);
+
+    return { seeds, gear };
+  } catch (err) {
+    console.error('Error parsing description:', err);
+    return { seeds: [], gear: [] };
+  }
+};
 
   const parseNextUpdate = (description) => {
     try {
@@ -280,3 +282,4 @@ export default function Home() {
     </>
   );
 }
+
