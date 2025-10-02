@@ -28,6 +28,7 @@ export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
   const [error, setError] = useState(null);
+  const [isFetching, setIsFetching] = useState(false); // Prevent concurrent fetches
 
   const cleanName = (name) => {
     return name.replace(/^[^\w]+/, "").trim().toLowerCase();
@@ -35,7 +36,6 @@ export default function Home() {
 
   const parseStockFromDescription = (description) => {
     try {
-      // Split into seeds and gear sections
       const sections = description.split('**Gear**');
       if (sections.length < 2) {
         console.error('Invalid description format: Gear section not found');
@@ -45,7 +45,6 @@ export default function Home() {
       const seedsText = sections[0].replace('**Seeds**', '').trim();
       const gearText = sections[1].split('\n\n')[0].trim();
 
-      // Parse seeds
       const seeds = seedsText
         .split('\n')
         .filter(line => line.trim() && line.includes(' x'))
@@ -67,7 +66,6 @@ export default function Home() {
         })
         .filter(item => item !== null);
 
-      // Parse gear
       const gear = gearText
         .split('\n')
         .filter(line => line.trim() && line.includes(' x'))
@@ -113,6 +111,8 @@ export default function Home() {
   };
 
   const fetchStockData = async () => {
+    if (isFetching) return; // Prevent concurrent fetches
+    setIsFetching(true);
     try {
       const token = process.env.NEXT_PUBLIC_API_TOKEN;
       const res = await fetch("/api/stock", {
@@ -143,25 +143,32 @@ export default function Home() {
       const next = parseNextUpdate(description);
       if (next) {
         setNextUpdate(next);
+        setError(null);
       } else {
         setError('Failed to parse next update time');
+        // Fallback to 5-minute interval if timestamp parsing fails
+        setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
       }
     } catch (err) {
       console.error("Failed to fetch stock data:", err);
       setError("Failed to load stock data. Please try again later.");
+      // Fallback to 5-minute interval on error
+      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
+    } finally {
+      setIsFetching(false);
     }
   };
 
   useEffect(() => {
-    fetchStockData();
+    fetchStockData(); // Initial fetch
     const interval = setInterval(() => {
       const now = new Date();
-      if (nextUpdate && now >= nextUpdate) {
+      if (nextUpdate && now >= nextUpdate && !isFetching) {
         fetchStockData();
       }
-    }, 10000);
+    }, 5000); // Check every 5 seconds instead of 1 second
     return () => clearInterval(interval);
-  }, [nextUpdate]);
+  }, [nextUpdate, isFetching]);
 
   const formatCountdown = () => {
     if (!nextUpdate) return "Calculating...";
@@ -273,4 +280,3 @@ export default function Home() {
     </>
   );
 }
-
