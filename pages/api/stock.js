@@ -7,7 +7,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const apiUrl = "http://188.166.234.88:3000/stock.json";
+    const apiUrl = "https://plantsvsbrainrots.com/api/latest-message";
     const response = await fetch(apiUrl);
     if (!response.ok) throw new Error("Failed to fetch stock data");
 
@@ -18,3 +18,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
