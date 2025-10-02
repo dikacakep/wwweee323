@@ -27,74 +27,97 @@ const gearImages = {
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
+  const [error, setError] = useState(null);
 
   const cleanName = (name) => {
     return name.replace(/^[^\w]+/, "").trim().toLowerCase();
   };
 
   const parseStockFromDescription = (description) => {
-    const sections = description.split('**Gear**');
-    if (sections.length < 2) {
-      console.error('Invalid description format');
+    try {
+      // Split into seeds and gear sections
+      const sections = description.split('**Gear**');
+      if (sections.length < 2) {
+        console.error('Invalid description format: Gear section not found');
+        return { seeds: [], gear: [] };
+      }
+
+      const seedsText = sections[0].replace('**Seeds**', '').trim();
+      const gearText = sections[1].split('\n\n')[0].trim();
+
+      // Parse seeds
+      const seeds = seedsText
+        .split('\n')
+        .filter(line => line.trim() && line.includes(' x'))
+        .map(line => {
+          const [namePart, stockStr] = line.split(' x');
+          if (!namePart || !stockStr) {
+            console.warn(`Invalid seed line format: ${line}`);
+            return null;
+          }
+          const name = namePart.trim();
+          const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
+          const clean = cleanName(name);
+          const icon = seedImages[`${clean} seed`] || seedImages[clean] || "";
+          return {
+            name: name.replace(/^[^\w]+/, "").trim(),
+            icon,
+            stock,
+          };
+        })
+        .filter(item => item !== null);
+
+      // Parse gear
+      const gear = gearText
+        .split('\n')
+        .filter(line => line.trim() && line.includes(' x'))
+        .map(line => {
+          const [namePart, stockStr] = line.split(' x');
+          if (!namePart || !stockStr) {
+            console.warn(`Invalid gear line format: ${line}`);
+            return null;
+          }
+          const name = namePart.trim();
+          const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
+          const clean = cleanName(name);
+          const icon = gearImages[clean] || "";
+          return {
+            name: name.replace(/^[^\w]+/, "").trim(),
+            icon,
+            stock,
+          };
+        })
+        .filter(item => item !== null);
+
+      return { seeds, gear };
+    } catch (err) {
+      console.error('Error parsing description:', err);
       return { seeds: [], gear: [] };
     }
-
-    const seedsText = sections[0].replace('**Seeds**', '').trim();
-    const gearText = sections[1].split('\n\n')[0].trim();
-
-    const seeds = seedsText
-      .split('\n')
-      .filter(line => line.trim() && ' x' in line)
-      .map(line => {
-        const [namePart, stockStr] = line.split(' x');
-        const name = namePart.trim();
-        const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
-        const clean = cleanName(name);
-        const icon = seedImages[`${clean} seed`] || seedImages[clean] || "";
-        return {
-          name: name.replace(/^[^\w]+/, "").trim(),
-          icon,
-          stock,
-        };
-      });
-
-    const gear = gearText
-      .split('\n')
-      .filter(line => line.trim() && ' x' in line)
-      .map(line => {
-        const [namePart, stockStr] = line.split(' x');
-        const name = namePart.trim();
-        const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
-        const clean = cleanName(name);
-        const icon = gearImages[clean] || "";
-        return {
-          name: name.replace(/^[^\w]+/, "").trim(),
-          icon,
-          stock,
-        };
-      });
-
-    return { seeds, gear };
   };
 
   const parseNextUpdate = (description) => {
-    const timeLine = description.split('\n\n').pop();
-    const match = timeLine.match(/<t:(\d+):R>/);
-    if (!match) {
-      console.error('No timestamp found in description');
+    try {
+      const timeLine = description.split('\n\n').pop();
+      const match = timeLine.match(/<t:(\d+):R>/);
+      if (!match) {
+        console.error('No timestamp found in description');
+        return null;
+      }
+      const timestamp = parseInt(match[1], 10);
+      return new Date(timestamp * 1000);
+    } catch (err) {
+      console.error('Error parsing next update:', err);
       return null;
     }
-
-    const timestamp = parseInt(match[1], 10);
-    return new Date(timestamp * 1000);
   };
 
   const fetchStockData = async () => {
     try {
-      const token = process.env.NEXT_PUBLIC_API_TOKEN; // Ambil token dari variabel lingkungan
+      const token = process.env.NEXT_PUBLIC_API_TOKEN;
       const res = await fetch("/api/stock", {
         headers: {
-          Authorization: `Bearer ${token}`, // Tambahkan header Authorization
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -105,14 +128,12 @@ export default function Home() {
       const data = await res.json();
 
       if (!Array.isArray(data) || data.length === 0) {
-        console.error('Invalid data format');
-        return;
+        throw new Error('Invalid data format: Empty or not an array');
       }
 
       const latest = data[0];
       if (!latest.embeds || latest.embeds.length === 0) {
-        console.error('No embeds in latest message');
-        return;
+        throw new Error('No embeds in latest message');
       }
 
       const description = latest.embeds[0].description;
@@ -122,9 +143,12 @@ export default function Home() {
       const next = parseNextUpdate(description);
       if (next) {
         setNextUpdate(next);
+      } else {
+        setError('Failed to parse next update time');
       }
     } catch (err) {
       console.error("Failed to fetch stock data:", err);
+      setError("Failed to load stock data. Please try again later.");
     }
   };
 
@@ -221,6 +245,8 @@ export default function Home() {
             </a>
           </div>
         </header>
+
+        {error && <div className="error-message">{error}</div>}
 
         <div className="last-update">
           ⏱️ Next update in: <strong>{formatCountdown()}</strong>
