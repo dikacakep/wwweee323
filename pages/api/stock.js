@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const token = authHeader.split(' ')[1];
 
     // Use a server-side environment variable (not NEXT_PUBLIC_)
-    if (token !== process.env.API_TOKEN) {
+    if (token !== process.env.NEXT_PUBLIC_API_TOKEN) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -63,3 +63,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
