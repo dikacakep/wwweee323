@@ -1,18 +1,4 @@
-import { RateLimit } from 'next-rate-limit';
-
-// Initialize rate limiter: max 10 requests per minute per IP
-const limiter = RateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10, // Max 10 requests per minute
-});
-
 export default async function handler(req, res) {
-  // Apply rate limiting
-  const { allowed, error } = limiter(req, res);
-  if (!allowed) {
-    return res.status(429).json({ error: 'Too many requests' });
-  }
-
   try {
     // Restrict to GET requests
     if (req.method !== 'GET') {
@@ -22,7 +8,7 @@ export default async function handler(req, res) {
     const authHeader = req.headers.authorization || '';
     const token = authHeader.split(' ')[1];
 
-    // Keep using NEXT_PUBLIC_API_TOKEN as requested
+    // Use NEXT_PUBLIC_API_TOKEN as requested
     if (token !== process.env.NEXT_PUBLIC_API_TOKEN) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -33,23 +19,36 @@ export default async function handler(req, res) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const response = await fetch(apiUrl, {
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+    let response;
+    try {
+      response = await fetch(apiUrl, {
+        signal: controller.signal,
+      });
+    } catch (fetchErr) {
+      console.error('Fetch error:', fetchErr);
+      throw new Error(`Failed to fetch from external API: ${fetchErr.message}`);
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch stock data: ${response.status}`);
+      console.error('External API response not OK:', {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      throw new Error(`External API responded with status ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('External API response:', data); // Log response for debugging
 
     // Validate response structure
     if (!Array.isArray(data) || data.length === 0 || !data[0].embeds || data[0].embeds.length === 0) {
+      console.error('Invalid data format:', data);
       throw new Error('Invalid data format from external API');
     }
 
-    // Set CORS headers (adjust origin as needed)
+    // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', 'https://plantvsbrainrots.vercel.app');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization');
@@ -59,7 +58,10 @@ export default async function handler(req, res) {
 
     return res.status(200).json(data);
   } catch (err) {
-    console.error('Error fetching stock:', err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Handler error:', {
+      message: err.message,
+      stack: err.stack,
+    });
+    return res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 }
