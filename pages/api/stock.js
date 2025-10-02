@@ -1,21 +1,65 @@
-export default async function handler(req, res) {
-  try {
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.split(" ")[1];
+import { RateLimit } from 'next-rate-limit';
 
-    if (token !== process.env.NEXT_PUBLIC_API_TOKEN) {
-      return res.status(401).json({ error: "Unauthorized" });
+// Initialize rate limiter: max 10 requests per minute per IP
+const limiter = RateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // Max 10 requests per windowMs
+});
+
+export default async function handler(req, res) {
+  // Apply rate limiting
+  const { allowed, error } = limiter(req, res);
+  if (!allowed) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
+  try {
+    // Ensure only GET requests are allowed
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const apiUrl = "https://plantsvsbrainrots.com/api/latest-message";
-    const response = await fetch(apiUrl);
-    if (!response.ok) throw new Error("Failed to fetch stock data");
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.split(' ')[1];
+
+    // Use a server-side environment variable (not NEXT_PUBLIC_)
+    if (token !== process.env.API_TOKEN) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const apiUrl = 'https://plantsvsbrainrots.com/api/latest-message';
+
+    // Add timeout to fetch (e.g., 10 seconds)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(apiUrl, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch stock data: ${response.status}`);
+    }
 
     const data = await response.json();
+
+    // Basic validation of response structure
+    if (!Array.isArray(data) || data.length === 0 || !data[0].embeds || data[0].embeds.length === 0) {
+      throw new Error('Invalid data format from external API');
+    }
+
+    // Set CORS headers (adjust origins as needed)
+    res.setHeader('Access-Control-Allow-Origin', 'https://plantvsbrainrots.vercel.app/');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+
+    // Optional: Cache the response for 1 minute to reduce external API calls
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+
     return res.status(200).json(data);
   } catch (err) {
-    console.error("Error fetching stock:", err);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error('Error fetching stock:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-
