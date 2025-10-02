@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 
@@ -14,8 +14,6 @@ const seedImages = {
   "carnivorous plant seed": "/carnivorous.png",
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
-  "shroombino seed": "/shroombino.png",
-  "grape seed": "grapeseed.png",
 };
 
 const gearImages = {
@@ -29,131 +27,125 @@ const gearImages = {
 export default function Home() {
   const [stockData, setStockData] = useState({ seeds: [], gear: [] });
   const [nextUpdate, setNextUpdate] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const prevDataRef = useRef(null);
-  const updateTimeoutRef = useRef(null);
-  const countdownIntervalRef = useRef(null);
 
-  const cleanName = (name) => name.replace(/^[^\w]+/, "").trim().toLowerCase();
-
-  const isDataChanged = (oldData, newData) => {
-    if (!oldData) return true;
-    return JSON.stringify(oldData) !== JSON.stringify(newData);
+  const cleanName = (name) => {
+    return name.replace(/^[^\w]+/, "").trim().toLowerCase();
   };
 
-  const resetTimer = (immediate = false) => {
-    // Clear timeout yang ada
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current);
+  const parseStockFromDescription = (description) => {
+    const sections = description.split('**Gear**');
+    if (sections.length < 2) {
+      console.error('Invalid description format');
+      return { seeds: [], gear: [] };
     }
-    
-    if (immediate) {
-      // Reset langsung tanpa delay
-      setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
-      setIsUpdating(false);
-    } else {
-      // Masuk mode updating selama 14 detik
-      setIsUpdating(true);
-      setNextUpdate(null); // Hentikan countdown
-      
-      updateTimeoutRef.current = setTimeout(() => {
-        // Setelah 14 detik, reset timer ke 5 menit
-        setNextUpdate(new Date(Date.now() + 5 * 60 * 1000));
-        setIsUpdating(false);
-      }, 14000);
+
+    const seedsText = sections[0].replace('**Seeds**', '').trim();
+    const gearText = sections[1].split('\n\n')[0].trim();
+
+    const seeds = seedsText
+      .split('\n')
+      .filter(line => line.trim() && ' x' in line)
+      .map(line => {
+        const [namePart, stockStr] = line.split(' x');
+        const name = namePart.trim();
+        const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
+        const clean = cleanName(name);
+        const icon = seedImages[`${clean} seed`] || seedImages[clean] || "";
+        return {
+          name: name.replace(/^[^\w]+/, "").trim(),
+          icon,
+          stock,
+        };
+      });
+
+    const gear = gearText
+      .split('\n')
+      .filter(line => line.trim() && ' x' in line)
+      .map(line => {
+        const [namePart, stockStr] = line.split(' x');
+        const name = namePart.trim();
+        const stock = parseInt(stockStr.replace('x', '').trim(), 10) || 0;
+        const clean = cleanName(name);
+        const icon = gearImages[clean] || "";
+        return {
+          name: name.replace(/^[^\w]+/, "").trim(),
+          icon,
+          stock,
+        };
+      });
+
+    return { seeds, gear };
+  };
+
+  const parseNextUpdate = (description) => {
+    const timeLine = description.split('\n\n').pop();
+    const match = timeLine.match(/<t:(\d+):R>/);
+    if (!match) {
+      console.error('No timestamp found in description');
+      return null;
     }
+
+    const timestamp = parseInt(match[1], 10);
+    return new Date(timestamp * 1000);
   };
 
   const fetchStockData = async () => {
     try {
+      const token = process.env.NEXT_PUBLIC_API_TOKEN; // Ambil token dari variabel lingkungan
       const res = await fetch("/api/stock", {
         headers: {
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+          Authorization: `Bearer ${token}`, // Tambahkan header Authorization
         },
       });
-      
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      
-      const data = await res.json();
-      
-      const seeds = data?.seeds?.map((item) => {
-        const clean = cleanName(item.name);
-        return {
-          name: item.name.replace(/^[^\w]+/, "").trim(),
-          icon: seedImages[clean] || "",
-          stock: item.stock,
-        };
-      }) || [];
 
-      const gear = data?.gears?.map((item) => {
-        const clean = cleanName(item.name);
-        return {
-          name: item.name.replace(/^[^\w]+/, "").trim(),
-          icon: gearImages[clean] || "",
-          stock: item.stock,
-        };
-      }) || [];
-
-      const newData = { seeds, gear };
-      
-      // Cek perubahan data
-      const hasChanged = isDataChanged(prevDataRef.current, newData);
-      
-      if (hasChanged) {
-        console.log("✅ Stock updated - Timer reset immediately");
-        setStockData(newData);
-        prevDataRef.current = newData;
-        resetTimer(true); // Reset timer langsung tanpa delay
-      } else {
-        console.log("ℹ️ Stock same as before - Normal timer reset");
-        setStockData(newData);
-        prevDataRef.current = newData;
-        resetTimer(false); // Normal reset dengan 14 detik delay
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-      
+
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        console.error('Invalid data format');
+        return;
+      }
+
+      const latest = data[0];
+      if (!latest.embeds || latest.embeds.length === 0) {
+        console.error('No embeds in latest message');
+        return;
+      }
+
+      const description = latest.embeds[0].description;
+      const { seeds, gear } = parseStockFromDescription(description);
+      setStockData({ seeds, gear });
+
+      const next = parseNextUpdate(description);
+      if (next) {
+        setNextUpdate(next);
+      }
     } catch (err) {
       console.error("Failed to fetch stock data:", err);
-      // Tetap reset timer dengan delay jika error
-      resetTimer(false);
     }
   };
 
   useEffect(() => {
-    // Fetch pertama kali
     fetchStockData();
-    
-    // Setup interval untuk countdown
     const interval = setInterval(() => {
-      if (nextUpdate && !isUpdating) {
-        const now = new Date();
-        if (now >= nextUpdate) {
-          fetchStockData();
-        }
+      const now = new Date();
+      if (nextUpdate && now >= nextUpdate) {
+        fetchStockData();
       }
     }, 1000);
-    
-    countdownIntervalRef.current = interval;
-    
-    return () => {
-      clearInterval(interval);
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current);
-      }
-    };
-  }, [nextUpdate, isUpdating]);
+    return () => clearInterval(interval);
+  }, [nextUpdate]);
 
   const formatCountdown = () => {
-    if (isUpdating) return "Updating...";
     if (!nextUpdate) return "Calculating...";
-    
     const now = new Date();
     const diff = nextUpdate - now;
-    
-    if (diff <= 0) return "00:00";
-    
+    if (diff <= 0) return "Updating...";
     const mins = Math.floor(diff / 60000);
     const secs = Math.floor((diff % 60000) / 1000);
-    
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
@@ -161,12 +153,12 @@ export default function Home() {
     <div className="item" key={item.name}>
       <div className="item-info">
         {item.icon ? (
-          <Image 
-            src={item.icon} 
-            alt={item.name} 
-            width={32} 
-            height={32} 
-            style={{ marginRight: 12 }} 
+          <Image
+            src={item.icon}
+            alt={item.name}
+            width={32}
+            height={32}
+            style={{ marginRight: 12 }}
           />
         ) : (
           <div style={{ width: 32, height: 32, marginRight: 12 }}></div>
@@ -184,38 +176,56 @@ export default function Home() {
     <>
       <Head>
         <title>Plant vs Brainrots - Live Seed & Gear Stock Notifier</title>
-        <meta name="description" content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop." />
-        <meta name="keywords" content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots" />
+        <meta
+          name="description"
+          content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop."
+        />
+        <meta
+          name="keywords"
+          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
+        />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
+
       <div className="container">
         <header>
           <h1>🌱 Live Plant vs Brainrots 🧠</h1>
           <p className="subtitle">Real-Time Seed & Gear Stock Notifier</p>
           <p className="description">
-            Stay updated with the latest Plant vs Brainrots shop changes! This site automatically pulls seed and gear stock directly from the game every 5 minutes — ensuring you never miss an item restock again.
+            Stay updated with the latest Plant vs Brainrots shop changes! This
+            site automatically pulls seed and gear stock directly from the game
+            every 5 minutes — ensuring you never miss an item restock again.
           </p>
           <div className="join-buttons">
-            <a href="https://discord.gg/Bun8HKKQ3D" className="join-btn discord-btn" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://discord.gg/Bun8HKKQ3D"
+              className="join-btn discord-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span className="btn-icon">💬</span>
               <span className="btn-text">Join Discord Server</span>
               <span className="btn-desc">🤖 Stock alerts & trading community</span>
             </a>
-            <a href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD" className="join-btn whatsapp-btn" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://chat.whatsapp.com/LMZ4Ulxr6LlEqeMMNMlTjD"
+              className="join-btn whatsapp-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span className="btn-icon">📱</span>
               <span className="btn-text">Join WhatsApp Group</span>
               <span className="btn-desc">📢 Real-time Plant vs Brainrots notifier</span>
             </a>
           </div>
         </header>
-        
+
         <div className="last-update">
           ⏱️ Next update in: <strong>{formatCountdown()}</strong>
         </div>
-        
+
         <div className="stats-grid">
           <div className="category-card">
             <div className="category-header">
@@ -224,7 +234,7 @@ export default function Home() {
             </div>
             <div className="item-list">{stockData.seeds.map(createItem)}</div>
           </div>
-          
+
           <div className="category-card">
             <div className="category-header">
               <div className="category-icon">⚙️</div>
