@@ -159,7 +159,7 @@ export default function Home() {
       if (nextUpdate && now >= nextUpdate) {
         fetchStockData();
       }
-    }, 1000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [nextUpdate]);
 
@@ -273,3 +273,4 @@ export default function Home() {
     </>
   );
 }
+
