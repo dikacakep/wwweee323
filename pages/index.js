@@ -16,6 +16,7 @@ const seedImages = {
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
   "mango seed": "/mango.png",
+  "king limone": "/limone.png"
 };
 
 const gearImages = {
@@ -23,7 +24,7 @@ const gearImages = {
   "frost grenade": "/frost_grenade.png",
   "banana gun": "/banana_gun.png",
   "frost blower": "/frost_blower.png",
-  "carrot launcher": "/carrot_launcher.png",
+  "carrot launcher": "/carrot_launcher.png"
 };
 
 const cleanName = (name) =>
@@ -543,5 +544,6 @@ export default function Home() {
     </>
   );
 }
+
 
 
