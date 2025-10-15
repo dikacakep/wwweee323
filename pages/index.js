@@ -16,7 +16,7 @@ const seedImages = {
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
   "mango seed": "/mango.png",
-  "king limone": "/limone.png"
+  "king limone seed": "/limone.png"
 };
 
 const gearImages = {
@@ -544,6 +544,7 @@ export default function Home() {
     </>
   );
 }
+
 
 
 
