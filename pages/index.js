@@ -158,56 +158,50 @@ export default function Home() {
   const [retryCount, setRetryCount] = useState(0);
 
   const fetchStock = async () => {
-    const now = Date.now();
-    if (isLoading || now - lastFetchTime < 10000) {
-      console.log("Fetch blocked by anti-spam");
-      return;
+  const now = Date.now();
+  if (isLoading || now - lastFetchTime < 10000) {
+    console.log("Fetch blocked by anti-spam");
+    return;
+  }
+  setIsLoading(true);
+  setLastFetchTime(now);
+  try {
+    const res = await fetch("/api/stock");
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      const errorMsg = `HTTP ${res.status}: ${res.statusText} ${text}`;
+      console.error("API Error:", errorMsg);
+      throw new Error(errorMsg);
     }
-    setIsLoading(true);
-    setLastFetchTime(now);
-    try {
-      const token = process.env.NEXT_PUBLIC_API_TOKEN || "";
-      const res = await fetch("/api/stock", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        const errorMsg = `HTTP ${res.status}: ${res.statusText}`;
-        console.error("API Error:", errorMsg);
-        throw new Error(errorMsg);
-      }
-
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("No data returned from API");
-      }
-
-      const latest = data[0];
-      const description = latest.embeds?.[0]?.description || "";
-      const parsed = parseStockFromDescription(description);
-
-      setStock(parsed);
-      const next = parseNextUpdate(description) || calculateNextFetchTime();
-      if (next && (!nextUpdate || next.getTime() !== nextUpdate.getTime())) {
-        setNextUpdate(next);
-      }
-      setError(null);
-      setRetryCount(0);
-      setCountdownKey((prev) => prev + 1);
-      console.log("Stock updated successfully!");
-    } catch (err) {
-      console.error("fetchStock error:", err.message);
-      setError(`Failed to load: ${err.message}. Retrying...`);
-      setRetryCount((prev) => prev + 1);
-      if (err.message.includes("500") && retryCount < 3) {
-        setTimeout(fetchStock, 60000);
-      } else {
-        setNextUpdate(calculateNextFetchTime());
-      }
-    } finally {
-      setIsLoading(false);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("No data returned from API");
     }
-  };
+    const latest = data[0];
+    const description = latest.embeds?.[0]?.description || "";
+    const parsed = parseStockFromDescription(description);
+    setStock(parsed);
+    const next = parseNextUpdate(description) || calculateNextFetchTime();
+    if (next && (!nextUpdate || next.getTime() !== nextUpdate.getTime())) {
+      setNextUpdate(next);
+    }
+    setError(null);
+    setRetryCount(0);
+    setCountdownKey((prev) => prev + 1);
+    console.log("Stock updated successfully!");
+  } catch (err) {
+    console.error("fetchStock error:", err.message);
+    setError(`Failed to load: ${err.message}. Retrying...`);
+    setRetryCount((prev) => prev + 1);
+    if (err.message.includes("500") && retryCount < 3) {
+      setTimeout(fetchStock, 60000);
+    } else {
+      setNextUpdate(calculateNextFetchTime());
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchStock();
@@ -549,4 +543,5 @@ export default function Home() {
     </>
   );
 }
+
 
