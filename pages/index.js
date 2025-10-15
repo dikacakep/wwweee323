@@ -248,6 +248,12 @@ export default function Home() {
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
         <link rel="icon" href="/favicon.ico" />
+            
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2348732504828730"
+          crossOrigin="anonymous"
+        ></script>
       </Head>
 
       <div className="page-wrap">
@@ -544,6 +550,7 @@ export default function Home() {
     </>
   );
 }
+
 
 
 
