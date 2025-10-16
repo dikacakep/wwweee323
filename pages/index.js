@@ -1,8 +1,8 @@
+// pages/index.js
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
-import AdSense from "../components/AdSense";
+import Image from "next/image";
 
 const seedImages = {
   "sunflower seed": "/sunflower.png",
@@ -17,7 +17,7 @@ const seedImages = {
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
   "mango seed": "/mango.png",
-  "king limone": "/limone.png",
+  "king limone": "/limone.png"
 };
 
 const gearImages = {
@@ -25,7 +25,7 @@ const gearImages = {
   "frost grenade": "/frost_grenade.png",
   "banana gun": "/banana_gun.png",
   "frost blower": "/frost_blower.png",
-  "carrot launcher": "/carrot_launcher.png",
+  "carrot launcher": "/carrot_launcher.png"
 };
 
 const cleanName = (name) =>
@@ -158,13 +158,6 @@ export default function Home() {
   const [countdownKey, setCountdownKey] = useState(0);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
-  const [currentTime, setCurrentTime] = useState("");
-
-  useEffect(() => {
-    setCurrentTime(
-      new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
-  }, []);
 
   const fetchStock = async () => {
     const now = Date.now();
@@ -200,9 +193,7 @@ export default function Home() {
       console.log("Stock updated successfully!");
     } catch (err) {
       console.error("fetchStock error:", err.message);
-      setError(
-        "Oops, something went wrong while fetching stock data. Please try again later or join our Discord for support."
-      );
+      setError(`Failed to load: ${err.message}. Retrying...`);
       setRetryCount((prev) => prev + 1);
       if (err.message.includes("500") && retryCount < 3) {
         setTimeout(fetchStock, 60000);
@@ -246,7 +237,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Plant vs Brainrots - Live Seed & Gear Stock Notifier</title>
+        <title>Plant vs Brainrots - Live Seed & Gear Stock Tracker</title>
         <meta
           name="description"
           content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop."
@@ -256,28 +247,31 @@ export default function Home() {
           content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
         />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
+        <link rel="canonical" href="https://plantvsbrainrots.vercel.app/" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className="page-wrap">
         <header className="site-header">
-          <nav className="site-nav">
-            <Link href="/">Home</Link>
-            <Link href="/about">About</Link>
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms of Use</Link>
-          </nav>
           <div className="header-left">
             <div className="title-block">
               <h1 className="site-title">🌱 Live Plant vs Brainrots 🧠</h1>
               <p className="site-sub">Real-Time Seed & Gear Stock Notifier</p>
             </div>
+
+            <nav className="main-nav">
+              <Link href="/">Home</Link>
+              <Link href="/guide">Guide</Link>
+              <Link href="/about">About</Link>
+              <Link href="/privacy-policy">Privacy</Link>
+            </nav>
+
             <p className="lead">
               Stay updated with the latest Plant vs Brainrots shop changes! This
               site automatically pulls seed and gear stock directly from the game
-              and displays it in a Discord-style embed.
+              and displays it in a Discord-style embed. <strong>New to the game? Check out our beginner's guide!</strong>
             </p>
+
             <div className="join-buttons">
               <a
                 href="https://discord.gg/Bun8HKKQ3D"
@@ -299,6 +293,7 @@ export default function Home() {
                   🤖 Stock alerts & trading community
                 </span>
               </a>
+
               <a
                 href="https://chat.whatsapp.com/Im4P6NtHraMLmiILNQvcOE"
                 className="join-btn whatsapp-btn"
@@ -321,6 +316,7 @@ export default function Home() {
               </a>
             </div>
           </div>
+
           <div className="header-right">
             <a
               href="https://discord.com/oauth2/authorize?client_id=1383114211432988783"
@@ -349,6 +345,7 @@ export default function Home() {
                     />
                   </div>
                 </div>
+
                 <div className="message-body">
                   <div className="meta-line">
                     <span className="username">
@@ -362,12 +359,13 @@ export default function Home() {
                         />
                       </span>
                     </span>
-                    <span className="msg-time">{currentTime}</span>
+                    <span className="msg-time" suppressHydrationWarning>
+                      Today at {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
                   </div>
+
                   <div
-                    className={`embed-card yellow-embed ${
-                      isLoading ? "loading" : ""
-                    }`}
+                    className={`embed-card yellow-embed ${isLoading ? "loading" : ""}`}
                   >
                     <div className="embed-leftbar" />
                     <div className="embed-content">
@@ -381,6 +379,7 @@ export default function Home() {
                         />
                         Plant vs Brainrots - STOCK
                       </div>
+
                       <div className="embed-text">
                         {error && (
                           <div
@@ -433,6 +432,7 @@ export default function Home() {
                               ))
                             )}
                           </div>
+
                           <div className="stock-column">
                             <div className="stock-header">GEAR STOCK</div>
                             {stock.gear.length === 0 && !isLoading ? (
@@ -465,13 +465,19 @@ export default function Home() {
                             )}
                           </div>
                         </div>
+
+                        <div className="progress-bar-container">
+                          <div className="progress-bar"></div>
+                        </div>
                       </div>
+
                       <div className="embed-footer">
                         <div className="footer-left">
                           <span className="footer-note">
                             Data pulled from Discord embeds
                           </span>
                         </div>
+
                         <div className="footer-right">
                           <span className="next">
                             Next update in:{" "}
@@ -483,11 +489,31 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <AdSense adSlot="your-ad-slot-id" />
                 </div>
               </article>
             </div>
+
+            {/* Konten statis untuk AdSense - minimal 300 kata */}
+            <div className="static-content">
+              <h2>About Plant vs Brainrots</h2>
+              <p>
+                <em>Plant vs Brainrots</em> is a popular Roblox game that combines farming, strategy, and PvP combat. Players collect seeds, grow plants, and use gear to defend against or attack other players' farms. The in-game shop refreshes every 5 minutes, offering limited stock of rare seeds and powerful gear.
+              </p>
+              <p>
+                This live tracker helps players monitor shop availability so they never miss a chance to grab rare items like <strong>Dragon Fruit Seed</strong>, <strong>Carnivorous Plant Seed</strong>, or powerful tools like the <strong>Banana Gun</strong> and <strong>Frost Blower</strong>.
+              </p>
+              <p>
+                For new players, understanding the economy and timing of shop refreshes is crucial. We recommend joining our Discord or WhatsApp groups for real-time alerts and trading opportunities.
+              </p>
+              <p>
+                Unlike other trackers, our system pulls data directly from the official Discord bot embeds, ensuring 100% accuracy and zero delay. The site updates automatically—no manual refresh needed.
+              </p>
+              <p>
+                Remember: stock is limited and sells out fast! Use this tool to plan your farming strategy and stay ahead of the competition.
+              </p>
+            </div>
           </section>
+
           <aside className="right-panel">
             <div className="card small">
               <div className="card-title">Status</div>
@@ -514,6 +540,7 @@ export default function Home() {
                 )}
               </div>
             </div>
+
             <div className="card small">
               <div className="card-title">Quick Actions</div>
               <div className="card-body actions">
@@ -528,20 +555,86 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            {/* Iklan hanya muncul setelah konten utama */}
+            <div className="card ad-placeholder">
+              <div className="card-title">Support Us</div>
+              <div className="card-body">
+                <p style={{ fontSize: "0.85rem", color: "#b9bbbe" }}>
+                  Your support helps keep this tracker free and updated.
+                </p>
+                <ins
+                  className="adsbygoogle"
+                  style={{ display: "block", textAlign: "center" }}
+                  data-ad-client="ca-pub-2348732504828730"
+                  data-ad-slot="1234567890"
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"
+                ></ins>
+              </div>
+            </div>
           </aside>
         </main>
+
         <footer className="site-footer">
           <span>
-            © {new Date().getFullYear()} iRexus • Data displayed from Discord
-            embeds
+            © {new Date().getFullYear()} iRexus •{" "}
+            <Link href="/privacy-policy">Privacy Policy</Link> • Data from Discord
           </span>
-          <nav>
-            <Link href="/about">About</Link>
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms of Use</Link>
-          </nav>
         </footer>
+
+        {/* Script iklan di akhir body */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2348732504828730"
+          crossOrigin="anonymous"
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(adsbygoogle = window.adsbygoogle || []).push({});",
+          }}
+        />
       </div>
+
+      <style jsx>{`
+        .main-nav {
+          display: flex;
+          gap: 20px;
+          justify-content: center;
+          margin: 16px 0;
+          font-weight: 600;
+        }
+        .main-nav a {
+          color: var(--yellow);
+          text-decoration: none;
+          padding: 4px 8px;
+          border-radius: 6px;
+          transition: background 0.2s;
+        }
+        .main-nav a:hover {
+          background: rgba(254, 231, 92, 0.1);
+        }
+        .static-content {
+          margin-top: 24px;
+          padding: 16px;
+          background: var(--panel);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          line-height: 1.6;
+        }
+        .static-content h2 {
+          color: var(--yellow);
+          margin-bottom: 12px;
+          font-size: 1.4rem;
+        }
+        .static-content p {
+          margin-bottom: 12px;
+          color: #dcddde;
+        }
+        .ad-placeholder {
+          margin-top: auto;
+        }
+      `}</style>
     </>
   );
 }
