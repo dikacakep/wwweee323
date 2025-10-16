@@ -674,6 +674,51 @@ a {
   }
 }
 
+.site-nav {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.site-nav a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.site-nav a:hover {
+  text-decoration: underline;
+}
+
+.ad-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+
+.site-header a {
+  color: white; /* Warna link di header disesuaikan */
+}
+
+.site-header a:hover {
+  color: #e0e0e0;
+}
+
+.site-footer nav {
+  display: flex;
+  gap: 15px;
+}
+
+.site-footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+
 /* ---------- Discord-style round avatar + verified badge ---------- */
 .avatar-badge-group {
   position: relative;
