@@ -1,7 +1,8 @@
-// pages/index.js
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
+import AdSense from "../components/AdSense";
 
 const seedImages = {
   "sunflower seed": "/sunflower.png",
@@ -16,7 +17,7 @@ const seedImages = {
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
   "mango seed": "/mango.png",
-  "king limone": "/limone.png"
+  "king limone": "/limone.png",
 };
 
 const gearImages = {
@@ -24,7 +25,7 @@ const gearImages = {
   "frost grenade": "/frost_grenade.png",
   "banana gun": "/banana_gun.png",
   "frost blower": "/frost_blower.png",
-  "carrot launcher": "/carrot_launcher.png"
+  "carrot launcher": "/carrot_launcher.png",
 };
 
 const cleanName = (name) =>
@@ -157,6 +158,13 @@ export default function Home() {
   const [countdownKey, setCountdownKey] = useState(0);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [currentTime, setCurrentTime] = useState("");
+
+  useEffect(() => {
+    setCurrentTime(
+      new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+  }, []);
 
   const fetchStock = async () => {
     const now = Date.now();
@@ -192,7 +200,9 @@ export default function Home() {
       console.log("Stock updated successfully!");
     } catch (err) {
       console.error("fetchStock error:", err.message);
-      setError(`Failed to load: ${err.message}. Retrying...`);
+      setError(
+        "Oops, something went wrong while fetching stock data. Please try again later or join our Discord for support."
+      );
       setRetryCount((prev) => prev + 1);
       if (err.message.includes("500") && retryCount < 3) {
         setTimeout(fetchStock, 60000);
@@ -248,29 +258,26 @@ export default function Home() {
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
         <link rel="icon" href="/favicon.ico" />
-
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2348732504828730"
-          crossOrigin="anonymous"
-        ></script>
       </Head>
 
       <div className="page-wrap">
-        {/*  FIX: properly closed <header>  */}
         <header className="site-header">
+          <nav className="site-nav">
+            <Link href="/">Home</Link>
+            <Link href="/about">About</Link>
+            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/terms">Terms of Use</Link>
+          </nav>
           <div className="header-left">
             <div className="title-block">
               <h1 className="site-title">🌱 Live Plant vs Brainrots 🧠</h1>
               <p className="site-sub">Real-Time Seed & Gear Stock Notifier</p>
             </div>
-
             <p className="lead">
               Stay updated with the latest Plant vs Brainrots shop changes! This
               site automatically pulls seed and gear stock directly from the game
               and displays it in a Discord-style embed.
             </p>
-
             <div className="join-buttons">
               <a
                 href="https://discord.gg/Bun8HKKQ3D"
@@ -292,7 +299,6 @@ export default function Home() {
                   🤖 Stock alerts & trading community
                 </span>
               </a>
-
               <a
                 href="https://chat.whatsapp.com/Im4P6NtHraMLmiILNQvcOE"
                 className="join-btn whatsapp-btn"
@@ -315,7 +321,6 @@ export default function Home() {
               </a>
             </div>
           </div>
-
           <div className="header-right">
             <a
               href="https://discord.com/oauth2/authorize?client_id=1383114211432988783"
@@ -344,7 +349,6 @@ export default function Home() {
                     />
                   </div>
                 </div>
-
                 <div className="message-body">
                   <div className="meta-line">
                     <span className="username">
@@ -358,20 +362,18 @@ export default function Home() {
                         />
                       </span>
                     </span>
-                    <span className="msg-time" suppressHydrationWarning>
-                      Today at {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <span className="msg-time">{currentTime}</span>
                   </div>
-
                   <div
-                    className={`embed-card yellow-embed ${isLoading ? "loading" : ""
-                      }`}
+                    className={`embed-card yellow-embed ${
+                      isLoading ? "loading" : ""
+                    }`}
                   >
                     <div className="embed-leftbar" />
                     <div className="embed-content">
                       <div className="embed-title">
                         <Image
-                          src="/chart.webp" // ganti dengan path GIF yang kamu inginkan
+                          src="/chart.webp"
                           alt="Chart"
                           width={24}
                           height={24}
@@ -379,7 +381,6 @@ export default function Home() {
                         />
                         Plant vs Brainrots - STOCK
                       </div>
-
                       <div className="embed-text">
                         {error && (
                           <div
@@ -432,7 +433,6 @@ export default function Home() {
                               ))
                             )}
                           </div>
-
                           <div className="stock-column">
                             <div className="stock-header">GEAR STOCK</div>
                             {stock.gear.length === 0 && !isLoading ? (
@@ -465,19 +465,13 @@ export default function Home() {
                             )}
                           </div>
                         </div>
-
-                        <div className="progress-bar-container">
-                          <div className="progress-bar"></div>
-                        </div>
                       </div>
-
                       <div className="embed-footer">
                         <div className="footer-left">
                           <span className="footer-note">
                             Data pulled from Discord embeds
                           </span>
                         </div>
-
                         <div className="footer-right">
                           <span className="next">
                             Next update in:{" "}
@@ -489,11 +483,11 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+                  <AdSense adSlot="your-ad-slot-id" />
                 </div>
               </article>
             </div>
           </section>
-
           <aside className="right-panel">
             <div className="card small">
               <div className="card-title">Status</div>
@@ -515,14 +509,11 @@ export default function Home() {
                 {retryCount > 0 && (
                   <div className="row">
                     <div className="label">Retries</div>
-                    <div className="value">
-                      {retryCount}/3
-                    </div>
+                    <div className="value">{retryCount}/3</div>
                   </div>
                 )}
               </div>
             </div>
-
             <div className="card small">
               <div className="card-title">Quick Actions</div>
               <div className="card-body actions">
@@ -539,12 +530,16 @@ export default function Home() {
             </div>
           </aside>
         </main>
-
         <footer className="site-footer">
           <span>
             © {new Date().getFullYear()} iRexus • Data displayed from Discord
             embeds
           </span>
+          <nav>
+            <Link href="/about">About</Link>
+            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/terms">Terms of Use</Link>
+          </nav>
         </footer>
       </div>
     </>
