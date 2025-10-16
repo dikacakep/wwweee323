@@ -158,6 +158,7 @@ export default function Home() {
   const [countdownKey, setCountdownKey] = useState(0);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [currentTime, setCurrentTime] = useState("");
 
   const fetchStock = async () => {
     const now = Date.now();
@@ -225,6 +226,12 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [nextUpdate]);
 
+  useEffect(() => {
+    setCurrentTime(
+      new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+  }, []);
+
   const formatCountdown = () => {
     if (!nextUpdate) return "Calculating...";
     const diff = nextUpdate - new Date();
@@ -244,11 +251,16 @@ export default function Home() {
         />
         <meta
           name="keywords"
-          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
+          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, plant vs brainrots stock tracker, seeds, gear, plant vs brainrots live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app/" />
         <link rel="icon" href="/favicon.ico" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2348732504828730"
+          crossOrigin="anonymous"
+        ></script>
       </Head>
 
       <div className="page-wrap">
@@ -359,9 +371,7 @@ export default function Home() {
                         />
                       </span>
                     </span>
-                    <span className="msg-time" suppressHydrationWarning>
-                      Today at {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <span className="msg-time">{currentTime || "Loading..."}</span>
                   </div>
 
                   <div
@@ -493,7 +503,6 @@ export default function Home() {
               </article>
             </div>
 
-            {/* Konten statis untuk AdSense - minimal 300 kata */}
             <div className="static-content">
               <h2>About Plant vs Brainrots</h2>
               <p>
@@ -555,24 +564,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-
-            {/* Iklan hanya muncul setelah konten utama */}
-            <div className="card ad-placeholder">
-              <div className="card-title">Support Us</div>
-              <div className="card-body">
-                <p style={{ fontSize: "0.85rem", color: "#b9bbbe" }}>
-                  Your support helps keep this tracker free and updated.
-                </p>
-                <ins
-                  className="adsbygoogle"
-                  style={{ display: "block", textAlign: "center" }}
-                  data-ad-client="ca-pub-2348732504828730"
-                  data-ad-slot="1234567890"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"
-                ></ins>
-              </div>
-            </div>
           </aside>
         </main>
 
@@ -582,18 +573,6 @@ export default function Home() {
             <Link href="/privacy-policy">Privacy Policy</Link> • Data from Discord
           </span>
         </footer>
-
-        {/* Script iklan di akhir body */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2348732504828730"
-          crossOrigin="anonymous"
-        ></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "(adsbygoogle = window.adsbygoogle || []).push({});",
-          }}
-        />
       </div>
 
       <style jsx>{`
@@ -630,9 +609,6 @@ export default function Home() {
         .static-content p {
           margin-bottom: 12px;
           color: #dcddde;
-        }
-        .ad-placeholder {
-          margin-top: auto;
         }
       `}</style>
     </>
