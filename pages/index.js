@@ -243,7 +243,7 @@ export default function Home() {
         />
         <meta
           name="keywords"
-          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
+          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, plant vs brainrots stock tracker, seeds, gear, live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app" />
@@ -399,3 +399,4 @@ export default function Home() {
     </>
   );
 }
+
