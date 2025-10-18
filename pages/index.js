@@ -1,9 +1,9 @@
 // pages/index.js
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import Image from "next/image";
 
+// --- Konfigurasi gambar ---
 const seedImages = {
   "sunflower seed": "/sunflower.png",
   "cactus seed": "/cactus.png",
@@ -241,17 +241,27 @@ export default function Home() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 80,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <>
       <Head>
-        <title>Plant vs Brainrots - Live Seed & Gear Stock Tracker</title>
+        <title>Plant vs Brainrots - Live Tracker, Guide & Community Hub</title>
         <meta
           name="description"
-          content="Track Plant vs Brainrots seed 🌱 and gear ⚙️ stock in real-time. Data updates automatically every 5 minutes directly from the in-game shop."
+          content="Complete Plant vs Brainrots resource: live shop stock, wiki, rarity guide, mutation system, active codes, fusion recipes, and trading tips. Updated in real-time for Roblox players."
         />
         <meta
           name="keywords"
-          content="plant vs brainrots, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, plant vs brainrots stock tracker, seeds, gear, plant vs brainrots live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
+          content="plant vs brainrots, plant vs brainrots guide, Plant vs brainrots wiki, plant vs brainrot, plants vs brainrot, plants vs brainrots, pvb, plant vs brainrots info stock, plant vs brainrots stock notifier, plant vs brainrots stock tracker, seeds, gear, plant vs brainrots live stock, pvb shop, pvb seeds, trading server plant vs brainrots"
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app/" />
@@ -259,24 +269,26 @@ export default function Home() {
       </Head>
 
       <div className="page-wrap">
+        {/* Navigation Header */}
         <header className="site-header">
           <div className="header-left">
             <div className="title-block">
-              <h1 className="site-title">🌱 Live Plant vs Brainrots 🧠</h1>
-              <p className="site-sub">Real-Time Seed & Gear Stock Notifier</p>
+              <h1 className="site-title">🌱 Plant vs Brainrots 🧠</h1>
+              <p className="site-sub">The Ultimate Roblox PlantVSBrainrots Resource Hub</p>
             </div>
 
             <nav className="main-nav">
-              <Link href="/">Home</Link>
-              <Link href="/guide">Guide</Link>
-              <Link href="/about">About</Link>
-              <Link href="/privacy-policy">Privacy</Link>
+              <button onClick={() => scrollToSection("tracker")}>LIVE STOCK</button>
+              <button onClick={() => scrollToSection("guide")}>GUIDE</button>
+              <button onClick={() => scrollToSection("rarity")}>RARITY</button>
+              <button onClick={() => scrollToSection("codes")}>CODES</button>
+              <button onClick={() => scrollToSection("faq")}>FAQ</button>
+              <button onClick={() => scrollToSection("about")}>ABOUT</button>
+              <button onClick={() => scrollToSection("privacy")}>PRIVACY</button>
             </nav>
 
             <p className="lead">
-              Stay updated with the latest Plant vs Brainrots shop changes! This
-              site automatically pulls seed and gear stock directly from the game
-              and displays it in a Discord-style embed. <strong>New to the game? Check out our beginner's guide!</strong>
+              Your all-in-one destination for <strong>Plant vs Brainrots</strong> on Roblox. Track live shop stock, learn plant rarities, redeem active codes, and master mutations — all in one place.
             </p>
 
             <div className="join-buttons">
@@ -285,20 +297,12 @@ export default function Home() {
                 className="join-btn discord-btn"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Join Discord Server"
               >
                 <span className="btn-icon">
-                  <Image
-                    src="/discord.gif"
-                    alt="Discord"
-                    width={24}
-                    height={24}
-                  />
+                  <Image src="/discord.gif" alt="Discord" width={24} height={24} />
                 </span>
                 <span className="btn-text">Join Discord</span>
-                <span className="btn-desc">
-                  🤖 Stock alerts & trading community
-                </span>
+                <span className="btn-desc">🤖 Alerts & Trading</span>
               </a>
 
               <a
@@ -306,20 +310,12 @@ export default function Home() {
                 className="join-btn whatsapp-btn"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Join WhatsApp Group"
               >
                 <span className="btn-icon">
-                  <Image
-                    src="/whatsapp.gif"
-                    alt="WhatsApp"
-                    width={24}
-                    height={24}
-                  />
+                  <Image src="/whatsapp.gif" alt="WhatsApp" width={24} height={24} />
                 </span>
                 <span className="btn-text">Join WhatsApp</span>
-                <span className="btn-desc">
-                  📢 Real-time Plant vs Brainrots notifier
-                </span>
+                <span className="btn-desc">📢 Real-time Notifier</span>
               </a>
             </div>
           </div>
@@ -330,7 +326,6 @@ export default function Home() {
               className="btn invite"
               target="_blank"
               rel="noopener noreferrer"
-              title="Invite Bot"
             >
               Invite Bot
             </a>
@@ -338,186 +333,317 @@ export default function Home() {
         </header>
 
         <main className="main-grid">
+          {/* LEFT PANEL - All Content */}
           <section className="left-panel">
-            <div className="discord-chat appear">
-              <article className="message bot">
-                <div className="avatar-wrap">
-                  <div className="avatar-badge-group">
-                    <Image
-                      src="/bot_avatar.jpeg"
-                      alt="bot avatar"
-                      width={48}
-                      height={48}
-                      className="avatar-img"
-                    />
-                  </div>
-                </div>
+            {/* === LIVE TRACKER === */}
+            <section id="tracker" className="content-section">
+              <h2>📊 Live Shop Stock Tracker</h2>
+              <p>
+                The in-game shop refreshes every <strong>5 minutes</strong>. Rare seeds like <em>Mr Carrot</em> or <em>King Limone</em> sell out in seconds. This tracker pulls data directly from the official Discord bot.
+              </p>
 
-                <div className="message-body">
-                  <div className="meta-line">
-                    <span className="username">
-                      iRexus
-                      <span className="verified-badge-inline">
-                        <Image
-                          src="/verified.png"
-                          alt="Verified App"
-                          width={32}
-                          height={32}
-                        />
+              <div className="discord-chat appear">
+                <article className="message bot">
+                  <div className="avatar-wrap">
+                    <div className="avatar-badge-group">
+                      <Image
+                        src="/bot_avatar.jpeg"
+                        alt="bot avatar"
+                        width={48}
+                        height={48}
+                        className="avatar-img"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="message-body">
+                    <div className="meta-line">
+                      <span className="username">
+                        iRexus
+                        <span className="verified-badge-inline">
+                          <Image
+                            src="/verified.png"
+                            alt="Verified App"
+                            width={32}
+                            height={32}
+                          />
+                        </span>
                       </span>
-                    </span>
-                    <span className="msg-time">{currentTime || "Loading..."}</span>
-                  </div>
+                      <span className="msg-time">{currentTime || "Loading..."}</span>
+                    </div>
 
-                  <div
-                    className={`embed-card yellow-embed ${isLoading ? "loading" : ""}`}
-                  >
-                    <div className="embed-leftbar" />
-                    <div className="embed-content">
-                      <div className="embed-title">
-                        <Image
-                          src="/chart.webp"
-                          alt="Chart"
-                          width={24}
-                          height={24}
-                          style={{ verticalAlign: "middle", marginRight: "6px" }}
-                        />
-                        Plant vs Brainrots - STOCK
-                      </div>
+                    <div className={`embed-card yellow-embed ${isLoading ? "loading" : ""}`}>
+                      <div className="embed-leftbar" />
+                      <div className="embed-content">
+                        <div className="embed-title">
+                          <Image
+                            src="/chart.webp"
+                            alt="Chart"
+                            width={24}
+                            height={24}
+                            style={{ verticalAlign: "middle", marginRight: "6px" }}
+                          />
+                          Plant vs Brainrots - STOCK
+                        </div>
 
-                      <div className="embed-text">
-                        {error && (
-                          <div
-                            className="error-message"
-                            style={{
-                              color: "#ed4245",
-                              fontSize: "14px",
-                              marginBottom: "12px",
-                              padding: "8px",
-                              background: "rgba(237, 66, 69, 0.1)",
-                              borderRadius: "4px",
-                            }}
-                          >
-                            {error}
-                          </div>
-                        )}
-                        {isLoading && (
-                          <div className="loading-indicator">
-                            <span className="spinner"></span>
-                            <span>Loading stock data...</span>
-                          </div>
-                        )}
-                        <div className="stock-grid">
-                          <div className="stock-column">
-                            <div className="stock-header">SEEDS STOCK</div>
-                            {stock.seeds.length === 0 && !isLoading ? (
-                              <div className="empty-line">
-                                No seeds detected.
-                              </div>
-                            ) : (
-                              stock.seeds.map((s, idx) => (
-                                <div className="stock-item" key={`s-${idx}`}>
-                                  {s.icon ? (
-                                    <span className="stock-icon">
-                                      <Image
-                                        src={s.icon}
-                                        alt={s.name}
-                                        width={20}
-                                        height={20}
-                                      />
-                                    </span>
-                                  ) : (
-                                    <span className="stock-emoji">🌱</span>
-                                  )}
-                                  <span className="stock-name">{s.name}</span>
-                                  <span className="stock-quantity">
-                                    x{s.stock}
-                                  </span>
-                                </div>
-                              ))
-                            )}
+                        <div className="embed-text">
+                          {error && (
+                            <div className="error-message">
+                              {error}
+                            </div>
+                          )}
+                          {isLoading && (
+                            <div className="loading-indicator">
+                              <span className="spinner"></span>
+                              <span>Loading stock data...</span>
+                            </div>
+                          )}
+                          <div className="stock-grid">
+                            <div className="stock-column">
+                              <div className="stock-header">SEEDS STOCK</div>
+                              {stock.seeds.length === 0 && !isLoading ? (
+                                <div className="empty-line">No seeds detected.</div>
+                              ) : (
+                                stock.seeds.map((s, idx) => (
+                                  <div className="stock-item" key={`s-${idx}`}>
+                                    {s.icon ? (
+                                      <span className="stock-icon">
+                                        <Image src={s.icon} alt={s.name} width={20} height={20} />
+                                      </span>
+                                    ) : (
+                                      <span className="stock-emoji">🌱</span>
+                                    )}
+                                    <span className="stock-name">{s.name}</span>
+                                    <span className="stock-quantity">x{s.stock}</span>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+
+                            <div className="stock-column">
+                              <div className="stock-header">GEAR STOCK</div>
+                              {stock.gear.length === 0 && !isLoading ? (
+                                <div className="empty-line">No gear detected.</div>
+                              ) : (
+                                stock.gear.map((gItem, idx) => (
+                                  <div className="stock-item" key={`g-${idx}`}>
+                                    {gItem.icon ? (
+                                      <span className="stock-icon">
+                                        <Image src={gItem.icon} alt={gItem.name} width={20} height={20} />
+                                      </span>
+                                    ) : (
+                                      <span className="stock-emoji">⚙️</span>
+                                    )}
+                                    <span className="stock-name">{gItem.name}</span>
+                                    <span className="stock-quantity">x{gItem.stock}</span>
+                                  </div>
+                                ))
+                              )}
+                            </div>
                           </div>
 
-                          <div className="stock-column">
-                            <div className="stock-header">GEAR STOCK</div>
-                            {stock.gear.length === 0 && !isLoading ? (
-                              <div className="empty-line">
-                                No gear detected.
-                              </div>
-                            ) : (
-                              stock.gear.map((gItem, idx) => (
-                                <div className="stock-item" key={`g-${idx}`}>
-                                  {gItem.icon ? (
-                                    <span className="stock-icon">
-                                      <Image
-                                        src={gItem.icon}
-                                        alt={gItem.name}
-                                        width={20}
-                                        height={20}
-                                      />
-                                    </span>
-                                  ) : (
-                                    <span className="stock-emoji">⚙️</span>
-                                  )}
-                                  <span className="stock-name">
-                                    {gItem.name}
-                                  </span>
-                                  <span className="stock-quantity">
-                                    x{gItem.stock}
-                                  </span>
-                                </div>
-                              ))
-                            )}
+                          <div className="progress-bar-container">
+                            <div className="progress-bar"></div>
                           </div>
                         </div>
 
-                        <div className="progress-bar-container">
-                          <div className="progress-bar"></div>
-                        </div>
-                      </div>
-
-                      <div className="embed-footer">
-                        <div className="footer-left">
-                          <span className="footer-note">
-                            Data pulled from Discord embeds
-                          </span>
-                        </div>
-
-                        <div className="footer-right">
-                          <span className="next">
-                            Next update in:{" "}
-                            <strong key={countdownKey}>
-                              {formatCountdown()}
-                            </strong>
-                          </span>
+                        <div className="embed-footer">
+                          <div className="footer-left">
+                            <span className="footer-note">Data pulled from Discord embeds</span>
+                          </div>
+                          <div className="footer-right">
+                            <span className="next">
+                              Next update in: <strong key={countdownKey}>{formatCountdown()}</strong>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            </div>
+                </article>
+              </div>
+            </section>
 
-            <div className="static-content">
-              <h2>About Plant vs Brainrots</h2>
+            {/* === GUIDE === */}
+            <section id="guide" className="content-section">
+              <h2>📖 Complete Beginner’s Guide</h2>
               <p>
-                <em>Plant vs Brainrots</em> is a popular Roblox game that combines farming, strategy, and PvP combat. Players collect seeds, grow plants, and use gear to defend against or attack other players' farms. The in-game shop refreshes every 5 minutes, offering limited stock of rare seeds and powerful gear.
+                <em>Plant vs Brainrots</em> is a strategic farming and PvP game on Roblox where you grow plants, collect rare seeds, and battle other players using unique gear.
+              </p>
+
+              <h3>1. Understanding Seeds</h3>
+              <p>
+                Seeds are the core of the game. Each seed grows into a plant that produces resources or has special combat abilities. Common seeds include Sunflower and Strawberry, while rare ones like Dragon Fruit and Carnivorous Plant can give you a huge advantage.
+              </p>
+              <p><strong>Tip:</strong> Always check the shop every 5 minutes—rare seeds sell out fast!</p>
+
+              <h3>2. Using Gear Effectively</h3>
+              <p>
+                Gear like the Banana Gun, Frost Blower, and Carrot Launcher can destroy enemy farms or protect yours. Water Bucket heals your plants, while Frost Grenade slows attackers.
+              </p>
+              <p>Combine gear strategically: use Frost Blower to freeze enemies, then attack with Carrot Launcher!</p>
+
+              <h3>3. Trading & Economy</h3>
+              <p>
+                Join our <a href="https://discord.gg/Bun8HKKQ3D" target="_blank" rel="noopener">Discord</a> or <a href="https://chat.whatsapp.com/Im4P6NtHraMLmiILNQvcOE" target="_blank" rel="noopener">WhatsApp</a> to trade seeds. Rare seeds can be worth thousands of in-game coins.
+              </p>
+
+              <h3>4. Pro Tips</h3>
+              <ul>
+                <li>Always keep backup seeds in your inventory.</li>
+                <li>Upgrade your farm layout for better defense.</li>
+                <li>Watch for shop refreshes—use our live tracker!</li>
+                <li>Team up with friends for luck increase.</li>
+              </ul>
+            </section>
+
+            {/* === RARITY & PRICING === */}
+            <section id="rarity" className="content-section">
+              <h2>💎 Plant Rarity & Pricing Guide</h2>
+              <p>
+                Plants in PvB are categorized by rarity, which affects their price, damage, and prestige. Below is the official pricing (in-game Cash) as of October 2025.
+              </p>
+
+              <table className="rarity-table">
+                <thead>
+                  <tr>
+                    <th>Plant</th>
+                    <th>Rarity</th>
+                    <th>Price (Cash)</th>
+                    <th>Base DMG</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Cactus</td><td>Rare</td><td>$200</td><td>10</td></tr>
+                  <tr><td>Strawberry</td><td>Rare</td><td>$1,250</td><td>25</td></tr>
+                  <tr><td>Pumpkin</td><td>Epic</td><td>$5,000</td><td>55</td></tr>
+                  <tr><td>Sunflower</td><td>Epic</td><td>$25,000</td><td>115</td></tr>
+                  <tr><td>Dragon Fruit</td><td>Legendary</td><td>$100,000</td><td>250</td></tr>
+                  <tr><td>Eggplant</td><td>Legendary</td><td>$250,000</td><td>500</td></tr>
+                  <tr><td>Watermelon</td><td>Mythic</td><td>$1,000,000</td><td>750</td></tr>
+                  <tr><td>Grape</td><td>Mythic</td><td>$2,500,000</td><td>1,500</td></tr>
+                  <tr><td>Cocotank</td><td>Godly</td><td>$5,000,000</td><td>2,000</td></tr>
+                  <tr><td>Carnivorous Plant</td><td>Godly</td><td>$25,000,000</td><td>2,500</td></tr>
+                  <tr><td>Mr. Carrot</td><td>Secret</td><td>$50,000,000</td><td>3,500</td></tr>
+                  <tr><td>Tomatrio</td><td>Secret</td><td>$125,000,000</td><td>9,000</td></tr>
+                  <tr><td>Shroombino</td><td>Secret</td><td>$200,000,000</td><td>12,500</td></tr>
+                  <tr><td>Mango</td><td>Secret</td><td>$367,000,000</td><td>7,500</td></tr>
+                  <tr><td>King Limone</td><td>Secret</td><td>$670,000,000</td><td>12,500</td></tr>
+                </tbody>
+              </table>
+
+              <h3>Mutations & Weather Events</h3>
+              <p>
+                Mutations enhance your plants. Common types: <strong>Gold (×2)</strong>, <strong>Diamond (×3)</strong>, <strong>Frozen (×4)</strong>, <strong>Neon (×4.5)</strong>, <strong>Rainbow (×6)</strong>, and <strong>Galactic (×8)</strong>.
               </p>
               <p>
-                This live tracker helps players monitor shop availability so they never miss a chance to grab rare items like <strong>Dragon Fruit Seed</strong>, <strong>Carnivorous Plant Seed</strong>, or powerful tools like the <strong>Banana Gun</strong> and <strong>Frost Blower</strong>.
+                These appear during special weather events like <em>Frozen Blizzard</em>, <em>Prismatic Surge</em>, or <em>Cosmic Bloom</em>.
+              </p>
+            </section>
+
+            {/* === ACTIVE CODES === */}
+            <section id="codes" className="content-section">
+              <h2>🎁 Active Redeem Codes (October 2025)</h2>
+              <p>Redeem these codes in-game for free rewards before they expire!</p>
+
+              <table className="codes-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Reward</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>STACKS</td><td>1x Lucky Potion</td><td>✅ Active</td></tr>
+                  <tr><td>frozen</td><td>1x Frost Grenade</td><td>✅ Active</td></tr>
+                  <tr><td>based</td><td>$5,000 Cash</td><td>✅ Active</td></tr>
+                </tbody>
+              </table>
+
+              <h3>How to Redeem</h3>
+              <ol>
+                <li>Open the game on Roblox.</li>
+                <li>Complete the tutorial (required).</li>
+                <li>Go to <strong>Shop → Codes / Redeem tab</strong>.</li>
+                <li>Enter the code and press <strong>Claim</strong>.</li>
+              </ol>
+              <p><strong>Note:</strong> Codes expire without notice. Redeem ASAP!</p>
+            </section>
+
+            {/* === FAQ === */}
+            <section id="faq" className="content-section">
+              <h2>❓ Frequently Asked Questions</h2>
+
+              <div className="faq-item">
+                <h3>How often does the shop refresh?</h3>
+                <p>Every 5 minutes. Our tracker updates automatically at each refresh.</p>
+              </div>
+
+              <div className="faq-item">
+                <h3>Is this site affiliated with Roblox or the game developers?</h3>
+                <p>No. We are a fan-made community resource, not affiliated with Roblox Corporation or the PvB developers.</p>
+              </div>
+
+              <div className="faq-item">
+                <h3>Do you collect my personal data?</h3>
+                <p>No. We do not collect, store, or process any personal information. See our Privacy Policy below.</p>
+              </div>
+
+              <div className="faq-item">
+                <h3>Why is my favorite seed not showing?</h3>
+                <p>The shop stock is random. If it’s not listed, it’s not currently available. Check back in 5 minutes!</p>
+              </div>
+
+              <div className="faq-item">
+                <h3>Can I buy plants with Robux?</h3>
+                <p>Plants are purchased with in-game Cash, not Robux. However, some cosmetics or boosts may use Robux.</p>
+              </div>
+            </section>
+
+            {/* === ABOUT === */}
+            <section id="about" className="content-section">
+              <h2>ℹ️ About This Site</h2>
+              <p>
+                This live stock tracker was created to help players of <em>Plant vs Brainrots</em> monitor real-time availability of seeds and gear in the in-game shop.
               </p>
               <p>
-                For new players, understanding the economy and timing of shop refreshes is crucial. We recommend joining our Discord or WhatsApp groups for real-time alerts and trading opportunities.
+                The shop refreshes every 5 minutes with random stock, and rare items often sell out in seconds. Our system pulls data directly from the official Discord bot to give you accurate, up-to-the-second information.
               </p>
+              <h3>Why We Built This</h3>
               <p>
-                Unlike other trackers, our system pulls data directly from the official Discord bot embeds, ensuring 100% accuracy and zero delay. The site updates automatically—no manual refresh needed.
+                As active players, we noticed many missed opportunities due to lack of real-time data. This tool ensures no player misses a chance to grab a <strong>King Limone</strong> or <strong>Mango</strong> again.
               </p>
+              <h3>Open & Transparent</h3>
               <p>
-                Remember: stock is limited and sells out fast! Use this tool to plan your farming strategy and stay ahead of the competition.
+                We do not modify or cache data—we display exactly what the bot posts. All data is sourced from public Discord embeds.
               </p>
-            </div>
+              <p>Made with ❤️ by iRexus. Not affiliated with Roblox Corporation.</p>
+            </section>
+
+            {/* === PRIVACY POLICY === */}
+            <section id="privacy" className="content-section">
+              <h2>🔒 Privacy Policy</h2>
+              <p><em>Last updated: October 17, 2025</em></p>
+
+              <h3>1. No Personal Data Collected</h3>
+              <p>Our website does NOT collect, store, or process any personal information from visitors. We do not use cookies for tracking.</p>
+
+              <h3>2. Data Source</h3>
+              <p>All displayed data (seed and gear stock) is pulled from public Discord bot messages. This data is not associated with any individual user.</p>
+
+              <h3>3. Third-Party Services</h3>
+              <p>We may use third-party advertising services in the future. If implemented, such services may use cookies.</p>
+
+              <h3>4. Changes to This Policy</h3>
+              <p>We may update this policy. The updated version will be posted here with a new "Last updated" date.</p>
+
+              <h3>5. Contact Us</h3>
+              <p>Questions? Join our <a href="https://discord.gg/Bun8HKKQ3D" target="_blank" rel="noopener">Discord server</a>.</p>
+            </section>
           </section>
 
+          {/* RIGHT PANEL - Status & Actions */}
           <aside className="right-panel">
             <div className="card small">
               <div className="card-title">Status</div>
@@ -564,47 +690,98 @@ export default function Home() {
 
         <footer className="site-footer">
           <span>
-            © {new Date().getFullYear()} iRexus •{" "}
-            <Link href="/privacy-policy">Privacy Policy</Link> • Data from Discord
+            © {new Date().getFullYear()} iRexus • 
+            <a href="#privacy" onClick={(e) => { e.preventDefault(); scrollToSection("privacy"); }}> Privacy Policy</a> • 
+            Data from Discord
           </span>
         </footer>
       </div>
 
+      {/* Global Styles */}
       <style jsx>{`
         .main-nav {
           display: flex;
-          gap: 20px;
+          gap: 12px;
+          flex-wrap: wrap;
           justify-content: center;
           margin: 16px 0;
-          font-weight: 600;
         }
-        .main-nav a {
+        .main-nav button {
+          background: none;
+          border: none;
           color: var(--yellow);
-          text-decoration: none;
+          font-weight: 600;
+          cursor: pointer;
           padding: 4px 8px;
           border-radius: 6px;
           transition: background 0.2s;
         }
-        .main-nav a:hover {
+        .main-nav button:hover {
           background: rgba(254, 231, 92, 0.1);
         }
-        .static-content {
-          margin-top: 24px;
-          padding: 16px;
+        .content-section {
+          margin-bottom: 32px;
+          padding: 20px;
           background: var(--panel);
-          border-radius: 8px;
+          border-radius: 12px;
           border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .content-section h2 {
+          color: var(--yellow);
+          margin-bottom: 16px;
+          font-size: 1.8rem;
+        }
+        .content-section h3 {
+          color: #fff;
+          margin: 20px 0 12px;
+          font-size: 1.3rem;
+        }
+        .content-section p, .content-section li {
+          margin-bottom: 12px;
           line-height: 1.6;
         }
-        .static-content h2 {
+        .content-section a {
+          color: var(--accent);
+          text-decoration: underline;
+        }
+        .content-section ul, .content-section ol {
+          padding-left: 20px;
+          margin: 12px 0;
+        }
+        .faq-item {
+          margin-bottom: 16px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .faq-item h3 {
+          margin-bottom: 8px;
+        }
+        .rarity-table, .codes-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 16px 0;
+          background: rgba(0,0,0,0.2);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .rarity-table th, .rarity-table td,
+        .codes-table th, .codes-table td {
+          padding: 10px;
+          text-align: left;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .rarity-table th, .codes-table th {
+          background: rgba(254, 231, 92, 0.1);
           color: var(--yellow);
-          margin-bottom: 12px;
-          font-size: 1.4rem;
         }
-        .static-content p {
-          margin-bottom: 12px;
-          color: #dcddde;
+        .ad-placeholder {
+          background: var(--panel);
+          border-radius: 8px;
+          padding: 12px;
+          border: 1px solid rgba(0, 0, 0, 0.45);
+          text-align: center;
         }
+        /* Existing styles from globals.css remain applicable */
       `}</style>
     </>
   );
