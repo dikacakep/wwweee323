@@ -1,5 +1,5 @@
 // pages/index.js
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 
@@ -12,10 +12,12 @@ const seedImages = {
   "dragon fruit seed": "/dragon_fruit.png",
   "eggplant seed": "/eggplant.png",
   "watermelon seed": "/watermelon.png",
+  "grape seed": "/grape.png",
   "cocotank seed": "/cocotank.png",
   "carnivorous plant seed": "/carnivorous.png",
   "mr carrot seed": "/mrcarrot.png",
   "tomatrio seed": "/tomatrio.png",
+  "shroombino seed": "/shroombino.png",
   "mango seed": "/mango.png",
   "king limone": "/limone.png"
 };
@@ -254,10 +256,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Plant vs Brainrots - Live Tracker, Guide & Community Hub</title>
+        <title>Plant vs Brainrots - Complete Guide & Live Stock Tracker</title>
         <meta
           name="description"
-          content="Complete Plant vs Brainrots resource: live shop stock, wiki, rarity guide, mutation system, active codes, fusion recipes, and trading tips. Updated in real-time for Roblox players."
+          content="Master Plant vs Brainrots on Roblox with our complete beginner's guide, rarity chart, active codes, and live shop stock tracker. Community-driven and updated in real-time."
         />
         <meta
           name="keywords"
@@ -274,23 +276,25 @@ export default function Home() {
           <div className="header-left">
             <div className="title-block">
               <h1 className="site-title">🌱 Plant vs Brainrots 🧠</h1>
-              <p className="site-sub">The Ultimate Roblox PlantVSBrainrots Resource Hub</p>
+              <p className="site-sub">Live Stock Tracker & Complete PvB Wiki Guide</p>
             </div>
 
             <nav className="main-nav">
-              <button onClick={() => scrollToSection("tracker")}>LIVE STOCK</button>
-              <button onClick={() => scrollToSection("guide")}>GUIDE</button>
-              <button onClick={() => scrollToSection("rarity")}>RARITY</button>
-              <button onClick={() => scrollToSection("codes")}>CODES</button>
+              <button onClick={() => scrollToSection("introduction")}>Intro</button>
+              <button onClick={() => scrollToSection("guide")}>Guide</button>
+              <button onClick={() => scrollToSection("tracker")}>Live Stock</button>
+              <button onClick={() => scrollToSection("rarity")}>Rarity</button>
+              <button onClick={() => scrollToSection("codes")}>Codes</button>
               <button onClick={() => scrollToSection("faq")}>FAQ</button>
-              <button onClick={() => scrollToSection("about")}>ABOUT</button>
-              <button onClick={() => scrollToSection("privacy")}>PRIVACY</button>
+              <button onClick={() => scrollToSection("about")}>About</button>
+              <button onClick={() => scrollToSection("privacy")}>Privacy</button>
             </nav>
 
             <p className="lead">
-              Your all-in-one destination for <strong>Plant vs Brainrots</strong> on Roblox. Track live shop stock, learn plant rarities, redeem active codes, and master mutations — all in one place.
+              Your all-in-one resource for <strong>Plant vs Brainrots</strong> on Roblox. Learn the game, track live shop stock, and join thousands of players in our community.
             </p>
 
+            {/* Tetap tampilkan tombol Join */}
             <div className="join-buttons">
               <a
                 href="https://discord.gg/Bun8HKKQ3D"
@@ -302,7 +306,7 @@ export default function Home() {
                   <Image src="/discord.gif" alt="Discord" width={24} height={24} />
                 </span>
                 <span className="btn-text">Join Discord</span>
-                <span className="btn-desc">🤖 Alerts & Trading</span>
+                <span className="btn-desc">Alerts & Trading</span>
               </a>
 
               <a
@@ -315,8 +319,18 @@ export default function Home() {
                   <Image src="/whatsapp.gif" alt="WhatsApp" width={24} height={24} />
                 </span>
                 <span className="btn-text">Join WhatsApp</span>
-                <span className="btn-desc">📢 Real-time Notifier</span>
+                <span className="btn-desc">Real-time Notifier</span>
               </a>
+              <button
+                className="join-btn livestock-btn"
+                onClick={() => scrollToSection("tracker")}
+              >
+                <span className="btn-icon">
+                  <Image src="/chart.webp" alt="Live Stock" width={24} height={24} />
+                </span>
+                <span className="btn-text">LIVE STOCK</span>
+                <span className="btn-desc">Scroll to Live Stock Tracker</span>
+              </button>
             </div>
           </div>
 
@@ -333,13 +347,68 @@ export default function Home() {
         </header>
 
         <main className="main-grid">
-          {/* LEFT PANEL - All Content */}
           <section className="left-panel">
-            {/* === LIVE TRACKER === */}
-            <section id="tracker" className="content-section">
-              <h2>📊 Live Shop Stock Tracker</h2>
+            {/* === INTRODUCTION === */}
+            <section id="introduction" className="content-section">
+              <h2>📘 Introduction to Plant vs Brainrots</h2>
               <p>
-                The in-game shop refreshes every <strong>5 minutes</strong>. Rare seeds like <em>Mr Carrot</em> or <em>King Limone</em> sell out in seconds. This tracker pulls data directly from the official Discord bot.
+                <em>Plant vs Brainrots</em> (PvB) is a unique Roblox experience that blends farming simulation, strategic combat, and player-driven economy.
+                Unlike traditional tower defense games, PvB introduces PvP mechanics where players can attack each other’s farms using powerful gear,
+                while defending their own crops with rare plants and tactical layouts.
+              </p>
+              <p>
+                This site was created to help players navigate the complex PvB ecosystem — with verified guides, live data, and community support.
+              </p>
+            </section>
+
+            {/* === GUIDE === */}
+            <section id="guide" className="content-section">
+              <h2>📖 Complete Beginner’s Guide</h2>
+              <p>
+                <em>Plant vs Brainrots</em> is a strategic farming and PvP game on Roblox where you grow plants, collect rare seeds, and battle others using unique gear.
+              </p>
+
+              <h3>1. Understanding Seeds</h3>
+              <p>
+                Seeds are the core of the game. Each seed grows into a plant that produces resources or has special combat abilities. Common seeds include Sunflower and Strawberry, while rare ones like Dragon Fruit and Carnivorous Plant can give you a huge advantage.
+              </p>
+              <p><strong>Tip:</strong> Always check the shop every 5 minutes—rare seeds sell out fast!</p>
+
+              <h3>2. Using Gear Effectively</h3>
+              <p>
+                Gear like the Banana Gun, Frost Blower, and Carrot Launcher can destroy enemy farms or protect yours. Water Bucket heals your plants, while Frost Grenade slows attackers.
+              </p>
+              <p>Combine gear strategically: use Frost Blower to freeze enemies, then attack with Carrot Launcher!</p>
+
+              <h3>3. Trading & Economy</h3>
+              <p>
+                Join our <a href="https://discord.gg/Bun8HKKQ3D" target="_blank" rel="noopener">Discord</a> or <a href="https://chat.whatsapp.com/Im4P6NtHraMLmiILNQvcOE" target="_blank" rel="noopener">WhatsApp</a> to trade seeds. Rare seeds can be worth thousands of in-game coins.
+              </p>
+
+              <h3>4. Pro Tips</h3>
+              <ul>
+                <li>Always keep backup seeds in your inventory.</li>
+                <li>Upgrade your farm layout for better defense.</li>
+                <li>Watch for shop refreshes—use our live tracker!</li>
+                <li>Team up with friends for luck increase.</li>
+              </ul>
+            </section>
+
+            {/* === LIVE TRACKER (now right after Guide) === */}
+            <section id="tracker" className="content-section">
+              <h2>
+                <Image
+                  src="/chart.webp"
+                  alt="Live Stock"
+                  width={28}
+                  height={28}
+                  style={{ verticalAlign: "middle", marginRight: "8px" }}
+                />
+                Live Shop Stock Tracker
+              </h2>
+              <p>
+                The in-game shop refreshes every <strong>5 minutes</strong>. Rare seeds like <em>Mr Carrot</em> or <em>King Limone</em> sell out in seconds.
+                This tracker pulls data directly from the official plant vs brainrots game — so you never miss a drop.
               </p>
 
               <div className="discord-chat appear">
@@ -449,7 +518,7 @@ export default function Home() {
 
                         <div className="embed-footer">
                           <div className="footer-left">
-                            <span className="footer-note">Data pulled from Discord embeds</span>
+                            <span className="footer-note">Data from in game plant vs brainrots</span>
                           </div>
                           <div className="footer-right">
                             <span className="next">
@@ -464,52 +533,16 @@ export default function Home() {
               </div>
             </section>
 
-            {/* === GUIDE === */}
-            <section id="guide" className="content-section">
-              <h2>📖 Complete Beginner’s Guide</h2>
-              <p>
-                <em>Plant vs Brainrots</em> is a strategic farming and PvP game on Roblox where you grow plants, collect rare seeds, and battle other players using unique gear.
-              </p>
-
-              <h3>1. Understanding Seeds</h3>
-              <p>
-                Seeds are the core of the game. Each seed grows into a plant that produces resources or has special combat abilities. Common seeds include Sunflower and Strawberry, while rare ones like Dragon Fruit and Carnivorous Plant can give you a huge advantage.
-              </p>
-              <p><strong>Tip:</strong> Always check the shop every 5 minutes—rare seeds sell out fast!</p>
-
-              <h3>2. Using Gear Effectively</h3>
-              <p>
-                Gear like the Banana Gun, Frost Blower, and Carrot Launcher can destroy enemy farms or protect yours. Water Bucket heals your plants, while Frost Grenade slows attackers.
-              </p>
-              <p>Combine gear strategically: use Frost Blower to freeze enemies, then attack with Carrot Launcher!</p>
-
-              <h3>3. Trading & Economy</h3>
-              <p>
-                Join our <a href="https://discord.gg/Bun8HKKQ3D" target="_blank" rel="noopener">Discord</a> or <a href="https://chat.whatsapp.com/Im4P6NtHraMLmiILNQvcOE" target="_blank" rel="noopener">WhatsApp</a> to trade seeds. Rare seeds can be worth thousands of in-game coins.
-              </p>
-
-              <h3>4. Pro Tips</h3>
-              <ul>
-                <li>Always keep backup seeds in your inventory.</li>
-                <li>Upgrade your farm layout for better defense.</li>
-                <li>Watch for shop refreshes—use our live tracker!</li>
-                <li>Team up with friends for luck increase.</li>
-              </ul>
-            </section>
-
             {/* === RARITY & PRICING === */}
             <section id="rarity" className="content-section">
               <h2>💎 Plant Rarity & Pricing Guide</h2>
-              <p>
-                Plants in PvB are categorized by rarity, which affects their price, damage, and prestige. Below is the official pricing (in-game Cash) as of October 2025.
-              </p>
-
+              <p>All prices in in-game Cash (not Robux).</p>
               <table className="rarity-table">
                 <thead>
                   <tr>
                     <th>Plant</th>
                     <th>Rarity</th>
-                    <th>Price (Cash)</th>
+                    <th>Price</th>
                     <th>Base DMG</th>
                   </tr>
                 </thead>
@@ -531,73 +564,40 @@ export default function Home() {
                   <tr><td>King Limone</td><td>Secret</td><td>$670,000,000</td><td>12,500</td></tr>
                 </tbody>
               </table>
-
-              <h3>Mutations & Weather Events</h3>
-              <p>
-                Mutations enhance your plants. Common types: <strong>Gold (×2)</strong>, <strong>Diamond (×3)</strong>, <strong>Frozen (×4)</strong>, <strong>Neon (×4.5)</strong>, <strong>Rainbow (×6)</strong>, and <strong>Galactic (×8)</strong>.
-              </p>
-              <p>
-                These appear during special weather events like <em>Frozen Blizzard</em>, <em>Prismatic Surge</em>, or <em>Cosmic Bloom</em>.
-              </p>
             </section>
 
             {/* === ACTIVE CODES === */}
             <section id="codes" className="content-section">
-              <h2>🎁 Active Redeem Codes (October 2025)</h2>
-              <p>Redeem these codes in-game for free rewards before they expire!</p>
-
+              <h2>🎁 Active Redeem Codes</h2>
               <table className="codes-table">
                 <thead>
                   <tr>
                     <th>Code</th>
                     <th>Reward</th>
-                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td>STACKS</td><td>1x Lucky Potion</td><td>✅ Active</td></tr>
-                  <tr><td>frozen</td><td>1x Frost Grenade</td><td>✅ Active</td></tr>
-                  <tr><td>based</td><td>$5,000 Cash</td><td>✅ Active</td></tr>
+                  <tr><td>STACKS</td><td>1x Lucky Potion</td></tr>
+                  <tr><td>frozen</td><td>1x Frost Grenade</td></tr>
+                  <tr><td>based</td><td>$5,000 Cash</td></tr>
                 </tbody>
               </table>
-
-              <h3>How to Redeem</h3>
-              <ol>
-                <li>Open the game on Roblox.</li>
-                <li>Complete the tutorial (required).</li>
-                <li>Go to <strong>Shop → Codes / Redeem tab</strong>.</li>
-                <li>Enter the code and press <strong>Claim</strong>.</li>
-              </ol>
-              <p><strong>Note:</strong> Codes expire without notice. Redeem ASAP!</p>
             </section>
 
             {/* === FAQ === */}
             <section id="faq" className="content-section">
               <h2>❓ Frequently Asked Questions</h2>
-
               <div className="faq-item">
-                <h3>How often does the shop refresh?</h3>
-                <p>Every 5 minutes. Our tracker updates automatically at each refresh.</p>
+                <h3>How accurate is the stock tracker?</h3>
+                <p>The official tracker claims to update within seconds of each stock refresh, providing highly accurate real-time stock tracking. However, minor delays may occur due to network latency, API synchronization, or server issues. These discrepancies are typically minimal and don’t significantly impact the tracker’s usefulness.</p>
               </div>
-
               <div className="faq-item">
-                <h3>Is this site affiliated with Roblox or the game developers?</h3>
-                <p>No. We are a fan-made community resource, not affiliated with Roblox Corporation or the PvB developers.</p>
+                <h3>What’s the best strategy for new players monitoring stock?</h3>
+                <p>Start by learning the rarity system and which seeds are truly rare versus commonly available. Don’t rush to buy everything—observe several stock update cycles first. Focus on building passive income through Brainrot battles, redeem all available codes for bonus resources, and join community Discord servers to learn from experienced players before making major purchases.</p>
               </div>
-
               <div className="faq-item">
-                <h3>Do you collect my personal data?</h3>
-                <p>No. We do not collect, store, or process any personal information. See our Privacy Policy below.</p>
-              </div>
-
-              <div className="faq-item">
-                <h3>Why is my favorite seed not showing?</h3>
-                <p>The shop stock is random. If it’s not listed, it’s not currently available. Check back in 5 minutes!</p>
-              </div>
-
-              <div className="faq-item">
-                <h3>Can I buy plants with Robux?</h3>
-                <p>Plants are purchased with in-game Cash, not Robux. However, some cosmetics or boosts may use Robux.</p>
+                <h3>Is this site official?</h3>
+                <p>No. We are a fan-made community resource.</p>
               </div>
             </section>
 
@@ -605,51 +605,33 @@ export default function Home() {
             <section id="about" className="content-section">
               <h2>ℹ️ About This Site</h2>
               <p>
-                This live stock tracker was created to help players of <em>Plant vs Brainrots</em> monitor real-time availability of seeds and gear in the in-game shop.
-              </p>
-              <p>
-                The shop refreshes every 5 minutes with random stock, and rare items often sell out in seconds. Our system pulls data directly from the official Discord bot to give you accurate, up-to-the-second information.
-              </p>
-              <h3>Why We Built This</h3>
-              <p>
-                As active players, we noticed many missed opportunities due to lack of real-time data. This tool ensures no player misses a chance to grab a <strong>King Limone</strong> or <strong>Mango</strong> again.
-              </p>
-              <h3>Open & Transparent</h3>
-              <p>
-                We do not modify or cache data—we display exactly what the bot posts. All data is sourced from public Discord embeds.
+                Created by active PvB players to help the community. We pull data directly from the official game and provide clear, verified guides.
               </p>
               <p>Made with ❤️ by iRexus. Not affiliated with Roblox Corporation.</p>
             </section>
 
-            {/* === PRIVACY POLICY === */}
+            {/* === PRIVACY POLICY (Updated - No AdSense Mention) === */}
             <section id="privacy" className="content-section">
               <h2>🔒 Privacy Policy</h2>
-              <p><em>Last updated: October 17, 2025</em></p>
-
+              <p><em>Last updated: October 19, 2025</em></p>
               <h3>1. No Personal Data Collected</h3>
-              <p>Our website does NOT collect, store, or process any personal information from visitors. We do not use cookies for tracking.</p>
-
+              <p>We do NOT collect, store, or process any personal information. No tracking cookies.</p>
               <h3>2. Data Source</h3>
-              <p>All displayed data (seed and gear stock) is pulled from public Discord bot messages. This data is not associated with any individual user.</p>
-
-              <h3>3. Third-Party Services</h3>
-              <p>We may use third-party advertising services in the future. If implemented, such services may use cookies.</p>
-
-              <h3>4. Changes to This Policy</h3>
-              <p>We may update this policy. The updated version will be posted here with a new "Last updated" date.</p>
-
-              <h3>5. Contact Us</h3>
+              <p>All data is pulled from plant vs brainrots games.</p>
+              <h3>3. Future Services</h3>
+              <p>We may integrate third-party services in the future. You will always control your privacy via browser settings.</p>
+              <h3>4. Contact</h3>
               <p>Questions? Join our <a href="https://discord.gg/Bun8HKKQ3D" target="_blank" rel="noopener">Discord server</a>.</p>
             </section>
           </section>
 
-          {/* RIGHT PANEL - Status & Actions */}
+          {/* RIGHT PANEL */}
           <aside className="right-panel">
             <div className="card small">
-              <div className="card-title">Status</div>
+              <div className="card-title">Data Status</div>
               <div className="card-body">
                 <div className="row">
-                  <div className="label">Fetch status</div>
+                  <div className="label">Status</div>
                   <div className="value">
                     {isLoading ? "Loading..." : error ? "Error" : "OK"}
                   </div>
@@ -662,12 +644,6 @@ export default function Home() {
                   <div className="label">Gear</div>
                   <div className="value">{stock.gear.length}</div>
                 </div>
-                {retryCount > 0 && (
-                  <div className="row">
-                    <div className="label">Retries</div>
-                    <div className="value">{retryCount}/3</div>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -675,7 +651,7 @@ export default function Home() {
               <div className="card-title">Quick Actions</div>
               <div className="card-body actions">
                 <button className="small-btn" onClick={() => fetchStock()}>
-                  Refresh Now
+                  Refresh Data
                 </button>
                 <button
                   className="small-btn ghost"
@@ -690,9 +666,8 @@ export default function Home() {
 
         <footer className="site-footer">
           <span>
-            © {new Date().getFullYear()} iRexus • 
-            <a href="#privacy" onClick={(e) => { e.preventDefault(); scrollToSection("privacy"); }}> Privacy Policy</a> • 
-            Data from Discord
+            © {new Date().getFullYear()} iRexus •
+            <a href="#privacy" onClick={(e) => { e.preventDefault(); scrollToSection("privacy"); }}> Privacy Policy</a>
           </span>
         </footer>
       </div>
@@ -774,14 +749,39 @@ export default function Home() {
           background: rgba(254, 231, 92, 0.1);
           color: var(--yellow);
         }
-        .ad-placeholder {
-          background: var(--panel);
-          border-radius: 8px;
-          padding: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.45);
-          text-align: center;
+        .error-message {
+          color: #ed4245;
+          font-size: 14px;
+          margin-bottom: 12px;
+          padding: 8px;
+          background: rgba(237, 66, 69, 0.1);
+          border-radius: 4px;
         }
-        /* Existing styles from globals.css remain applicable */
+        .loading-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          color: var(--muted);
+          font-size: 14px;
+          margin-bottom: 12px;
+          padding: 8px;
+          background: rgba(254, 231, 92, 0.1);
+          border-radius: 4px;
+        }
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(254, 231, 92, 0.3);
+          border-top: 2px solid var(--yellow);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        /* Join buttons & header styles from globals.css are assumed to exist */
       `}</style>
     </>
   );
