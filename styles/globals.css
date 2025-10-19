@@ -30,14 +30,16 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding: 18px;
-  line-height: 1.5;
+  line-height: 1.2;
 }
 
 /* Container */
 .page-wrap {
   max-width: 1180px;
+  width: 130%; /* Ensure full width on mobile */
   margin: 0 auto;
-  padding: 6px;
+  padding: 1px;
+  box-sizing: border-box;
 }
 
 a {
@@ -55,6 +57,7 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 20px;
   animation: slideDown 0.8s ease-out;
+  box-sizing: border-box; /* Prevent padding issues */
 }
 
 @keyframes slideDown {
@@ -70,6 +73,9 @@ a {
 
 .header-left {
   text-align: center;
+  width: 100%; /* Ensure it takes full width */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .title-block {
@@ -84,6 +90,8 @@ a {
   background-clip: text;
   animation: glow 2s ease-in-out infinite alternate;
   margin-bottom: 8px;
+  word-wrap: break-word; /* Prevent text overflow */
+  overflow-wrap: break-word;
 }
 
 @keyframes glow {
@@ -99,6 +107,8 @@ a {
   color: var(--muted);
   font-size: 1.1rem;
   margin-bottom: 16px;
+  word-wrap: break-word; /* Prevent text overflow */
+  overflow-wrap: break-word;
 }
 
 .lead {
@@ -106,12 +116,46 @@ a {
   font-size: 0.95rem;
   margin-bottom: 24px;
   opacity: 0.9;
+  word-wrap: break-word; /* Prevent text overflow */
+  overflow-wrap: break-word;
 }
 
 .header-right {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 16px; /* Reduce padding for mobile */
+    margin-bottom: 10px;
+    text-align: center; /* Ensure all content is centered */
+  }
+
+  .header-left {
+    text-align: center;
+    width: 100%;
+  }
+
+  .header-right {
+    position: static; /* Remove absolute positioning on mobile */
+    text-align: center;
+    margin-top: 10px; /* Add spacing */
+  }
+
+  .site-title {
+    font-size: 2rem; /* Slightly smaller for mobile */
+  }
+
+  .site-sub {
+    font-size: 1rem; /* Adjust for mobile */
+  }
+
+  .lead {
+    font-size: 0.9rem; /* Adjust for mobile */
+  }
 }
 
 /* Desain tombol join baru – Ukuran disesuaikan lebih compact dan fit text */
@@ -698,4 +742,135 @@ a {
   display: inline-flex;
   margin-left: 4px;
   vertical-align: middle;
+}
+
+.livestock-btn {
+  background: linear-gradient(45deg, #a78a35, #8b7912);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 25px rgba(255, 231, 92, 0.3);
+}
+
+.livestock-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255, 231, 92, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Tambahkan CSS ini ke globals.css untuk memperbaiki centering card di mobile */
+
+/* Cards - Desktop */
+.card {
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+.card.small {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Right Panel Container */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* MOBILE FIX - Center cards on mobile */
+@media (max-width: 980px) {
+  /* Grid jadi 1 kolom dengan justify center */
+  .main-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    justify-items: stretch !important; /* Left panel full width */
+  }
+  
+  /* Right panel khusus center content-nya */
+  .main-grid .right-panel {
+    justify-self: center !important; /* Center aside element itself */
+    width: 100% !important;
+    max-width: 400px !important; /* Limit width untuk center effect */
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+  
+  /* Card di right panel full width dalam container-nya */
+  .right-panel .card {
+    width: 100% !important;
+  }
+  
+  .card.small {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  /* Left panel tetap full width */
+  .main-grid .left-panel {
+    justify-self: stretch !important; /* Full width */
+    width: 100% !important;
+  }
+  
+  /* Content sections tetap full width */
+  .content-section {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Extra small screens - card lebih lebar */
+@media (max-width: 520px) {
+  .main-grid .right-panel {
+    max-width: 100% !important;
+    padding: 0 16px !important;
+  }
+  
+  .card-body .actions {
+    flex-direction: column !important;
+  }
+  
+  .small-btn {
+    width: 100% !important;
+  }
+}
+  
+  /* Center card content */
+  .card-body .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    color: #b9bbbe;
+  }
+  
+  /* Center action buttons */
+  .card-body .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .small-btn {
+    flex: 1;
+    min-width: 120px;
+  }
+
+/* Extra small screens */
+@media (max-width: 520px) {
+  .card {
+    padding: 10px;
+  }
+  
+  .card-body .actions {
+    flex-direction: column;
+  }
+  
+  .small-btn {
+    width: 100%;
+  }
 }
