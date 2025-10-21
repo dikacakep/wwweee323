@@ -268,6 +268,18 @@ export default function Home() {
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://plantvsbrainrots.vercel.app/" />
         <link rel="icon" href="/favicon.ico" />
+                    
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZLX3CNTXTE"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZLX3CNTXTE');
+      `,
+          }}
+        />
       </Head>
 
       <div className="page-wrap">
@@ -786,3 +798,4 @@ export default function Home() {
     </>
   );
 }
+
