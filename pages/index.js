@@ -19,7 +19,8 @@ const seedImages = {
   "tomatrio seed": "/tomatrio.png",
   "shroombino seed": "/shroombino.png",
   "mango seed": "/mango.png",
-  "king limone": "/limone.png"
+  "king limone": "/limone.png",
+  "starfruit": "/starfruit.png"
 };
 
 const gearImages = {
@@ -798,4 +799,5 @@ export default function Home() {
     </>
   );
 }
+
 
