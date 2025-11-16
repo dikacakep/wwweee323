@@ -323,7 +323,7 @@ export default function Home() {
               </a>
 
               <a
-                href="https://chat.whatsapp.com/Im4P6NtHraMLmiILNQvcOE"
+                href="https://chat.whatsapp.com/LEij7nfZIWKFocjBCHvuwf"
                 className="join-btn whatsapp-btn"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -799,5 +799,6 @@ export default function Home() {
     </>
   );
 }
+
 
 
